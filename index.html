@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💰 Money Saver</title>
+
+  <!-- CSS inside the HTML -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      margin: 0;
+    }
+
+    section {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    input {
+      margin: 5px 5px 10px 0;
+      padding: 5px;
+      width: 150px;
+    }
+
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+      background: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💰 Money Saver</h1>
+    <p>Track your expenses and reach your savings goals!</p>
+  </header>
+
+  <main>
+    <!-- Add Expense -->
+    <section id="add-expense">
+      <h2>Add Expense</h2>
+      <input type="text" id="expense-name" placeholder="Expense Name">
+      <input type="number" id="expense-amount" placeholder="Amount ($)">
+      <button id="add-btn">Add</button>
+    </section>
+
+    <!-- Expense List -->
+    <section id="expenses-list">
+      <h2>Your Expenses</h2>
+      <ul id="expense-items"></ul>
+      <p>Total Spent: $<span id="total">0</span></p>
+    </section>
+
+    <!-- Savings Goal -->
+    <section id="savings-goal">
+      <h2>Set Savings Goal</h2>
+      <input type="number" id="goal-amount" placeholder="Goal Amount ($)">
+      <button id="set-goal-btn">Set Goal</button>
+      <p id="goal-status"></p>
+    </section>
+
+    <!-- Money Saving Tips -->
+    <section id="tips">
+      <h2>💡 Money Saving Tips</h2>
+      <ul>
+        <li>Track all expenses daily.</li>
+        <li>Set realistic savings goals each month.</li>
+        <li>Cut unnecessary subscriptions.</li>
+        <li>Cook at home instead of eating out.</li>
+        <li>Compare prices before buying big items.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Money Saver &copy; 2026</p>
+  </footer>
+
+  <!-- JavaScript inside the HTML -->
+  <script>
+    let total = 0;
+    let goal = 0;
+
+    const expenseItems = document.getElementById("expense-items");
+    const totalDisplay = document.getElementById("total");
+    const goalStatus = document.getElementById("goal-status");
+
+    document.getElementById("add-btn").addEventListener("click", () => {
+      const name = document.getElementById("expense-name").value.trim();
+      const amount = parseFloat(document.getElementById("expense-amount").value);
+
+      if (!name || isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid expense name and amount.");
+        return;
+      }
+
+      const li = document.createElement("li");
+      li.textContent = `${name}: $${amount.toFixed(2)}`;
+      expenseItems.appendChild(li);
+
+      total += amount;
+      totalDisplay.textContent = total.toFixed(2);
+
+      document.getElementById("expense-name").value = "";
+      document.getElementById("expense-amount").value = "";
+
+      updateGoalStatus();
+    });
+
+    document.getElementById("set-goal-btn").addEventListener("click", () => {
+      goal = parseFloat(document.getElementById("goal-amount").value);
+      if (isNaN(goal) || goal <= 0) {
+        alert("Please enter a valid goal amount.");
+        return;
+      }
+      updateGoalStatus();
+    });
+
+    function updateGoalStatus() {
+      if (goal > 0) {
+        const remaining = goal - total;
+        if (remaining > 0) {
+          goalStatus.textContent = `You need $${remaining.toFixed(2)} more to reach your goal.`;
+          goalStatus.style.color = "red";
+        } else {
+          goalStatus.textContent = `🎉 Congratulations! You reached your goal!`;
+          goalStatus.style.color = "green";
+        }
+      } else {
+        goalStatus.textContent = "";
+      }
+    }
+  </script>
+</body>
+</html>
