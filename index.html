@@ -4,48 +4,40 @@
     <title>Money Saving Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Firebase (safe version) -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         body { font-family: Arial; background: #f4f6f9; padding: 20px; }
-
         .container {
             max-width: 600px;
             margin:auto;
             background:white;
             padding:20px;
             border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
         }
-
         input, select, button {
             width:100%;
             padding:10px;
             margin:8px 0;
         }
-
         button {
             background:#007bff;
             color:white;
             border:none;
             cursor:pointer;
         }
-
         .summary { display:flex; justify-content:space-between; }
-
         .box {
             width:30%;
             padding:10px;
             color:white;
             text-align:center;
         }
-
         .saving { background:green; }
         .expense { background:red; }
         .balance { background:black; }
-
         li {
             background:#eee;
             margin:5px 0;
@@ -53,7 +45,6 @@
             display:flex;
             justify-content:space-between;
         }
-
         .delete { color:red; cursor:pointer; }
     </style>
 </head>
@@ -61,7 +52,7 @@
 <body>
 
 <div class="container">
-    <h2>💰 Money Saving Tracker</h2>
+    <h2>💰 Money Tracker</h2>
 
     <input id="name" placeholder="Name">
     <input id="amount" type="number" placeholder="Amount">
@@ -94,33 +85,36 @@
 </div>
 
 <script>
-/* =========================
-   🔴 REPLACE THIS CONFIG
-========================= */
+// ==========================
+// 🔴 PUT YOUR FIREBASE CONFIG HERE
+// ==========================
 var firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_DOMAIN",
   projectId: "YOUR_PROJECT_ID"
 };
 
-// INIT FIREBASE
-try {
-    firebase.initializeApp(firebaseConfig);
-} catch (e) {}
+// SAFE FIREBASE INIT
+let db = null;
 
-var db;
 try {
-    db = firebase.firestore();
+    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        console.log("Firebase connected");
+    } else {
+        console.log("Firebase config not set → using local storage");
+    }
 } catch (e) {
-    console.log("Firebase not available");
+    console.log("Firebase error → fallback local");
 }
 
-// LOCAL STORAGE
+// LOCAL DATA
 let transactions = JSON.parse(localStorage.getItem("data")) || [];
 
-/* =========================
-   ADD BUTTON
-========================= */
+// ==========================
+// ADD BUTTON (ALWAYS WORK)
+// ==========================
 document.getElementById("addBtn").addEventListener("click", function () {
 
     let name = document.getElementById("name").value;
@@ -140,36 +134,38 @@ document.getElementById("addBtn").addEventListener("click", function () {
         desc
     };
 
-    // FIREBASE SAVE
+    // TRY FIREBASE
     if (db) {
         db.collection("transactions").add(t)
-        .then(() => {
-            loadFromFirebase();
-        })
-        .catch(() => {
-            fallbackLocal(t);
-        });
+        .then(() => loadFromFirebase())
+        .catch(() => saveLocal(t));
     } else {
-        fallbackLocal(t);
+        saveLocal(t);
     }
 
     document.getElementById("amount").value = "";
     document.getElementById("desc").value = "";
 });
 
-/* =========================
-   DELETE
-========================= */
+// ==========================
+// LOCAL SAVE
+// ==========================
+function saveLocal(t) {
+    t.id = Date.now();
+    transactions.push(t);
+    localStorage.setItem("data", JSON.stringify(transactions));
+    render();
+}
+
+// ==========================
+// DELETE
+// ==========================
 function deleteItem(id) {
 
     if (db && typeof id === "string") {
         db.collection("transactions").doc(id).delete()
-        .then(() => {
-            loadFromFirebase();
-        })
-        .catch(() => {
-            deleteLocal(id);
-        });
+        .then(() => loadFromFirebase())
+        .catch(() => deleteLocal(id));
     } else {
         deleteLocal(id);
     }
@@ -177,13 +173,13 @@ function deleteItem(id) {
 
 function deleteLocal(id) {
     transactions = transactions.filter(t => t.id != id);
-    save();
+    localStorage.setItem("data", JSON.stringify(transactions));
     render();
 }
 
-/* =========================
-   LOAD FROM FIREBASE
-========================= */
+// ==========================
+// LOAD FIREBASE
+// ==========================
 function loadFromFirebase() {
 
     if (!db) {
@@ -192,46 +188,25 @@ function loadFromFirebase() {
     }
 
     db.collection("transactions").get()
-    .then((querySnapshot) => {
-
+    .then(snapshot => {
         transactions = [];
 
-        querySnapshot.forEach((doc) => {
+        snapshot.forEach(doc => {
             transactions.push({
                 id: doc.id,
                 ...doc.data()
             });
         });
 
-        save();
+        localStorage.setItem("data", JSON.stringify(transactions));
         render();
-
     })
-    .catch(() => {
-        render();
-    });
+    .catch(() => render());
 }
 
-/* =========================
-   FALLBACK LOCAL
-========================= */
-function fallbackLocal(t) {
-    t.id = Date.now();
-    transactions.push(t);
-    save();
-    render();
-}
-
-/* =========================
-   SAVE LOCAL
-========================= */
-function save() {
-    localStorage.setItem("data", JSON.stringify(transactions));
-}
-
-/* =========================
-   RENDER UI
-========================= */
+// ==========================
+// UI
+// ==========================
 function render() {
     let list = document.getElementById("list");
     list.innerHTML = "";
@@ -262,9 +237,7 @@ function render() {
     document.getElementById("balance").innerText = (income - expense).toFixed(2);
 }
 
-/* =========================
-   INIT
-========================= */
+// INIT
 loadFromFirebase();
 </script>
 
