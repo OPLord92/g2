@@ -1,131 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Money Saving Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        .summary {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-        }
-
-        .box {
-            width: 30%;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            color: white;
-        }
-
-        .saving { background: green; }
-        .expense { background: red; }
-        .balance { background: #333; }
-
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        li {
-            padding: 10px;
-            margin: 5px 0;
-            background: #eee;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .delete {
-            color: red;
-            cursor: pointer;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-    <h2>💰 Money Saving Tracker</h2>
-
-    <!-- Name -->
-    <input type="text" id="name" placeholder="Enter Personal Name">
-
-    <!-- Amount -->
-    <input type="number" id="amount" placeholder="Enter Amount">
-
-    <!-- Type -->
-    <select id="type">
-        <option value="income">Add Savings (+)</option>
-        <option value="expense">Add Expense (-)</option>
-    </select>
-
-    <!-- Purpose -->
-    <input type="text" id="desc" placeholder="Purpose (e.g. Food, Salary)">
-
-    <button onclick="addTransaction()">Add</button>
-
-    <!-- Summary -->
-    <div class="summary">
-        <div class="box saving">
-            <h4>Savings</h4>
-            <p id="totalIncome">0</p>
-        </div>
-        <div class="box expense">
-            <h4>Expenses</h4>
-            <p id="totalExpense">0</p>
-        </div>
-        <div class="box balance">
-            <h4>Balance</h4>
-            <p id="balance">0</p>
-        </div>
-    </div>
-
-    <!-- List -->
-    <h3>Transaction History</h3>
-    <ul id="list"></ul>
-</div>
-
 <script>
-let transactions = [];
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+updateUI();
 
 function addTransaction() {
     let name = document.getElementById("name").value;
@@ -147,9 +23,10 @@ function addTransaction() {
     };
 
     transactions.push(transaction);
+
+    saveData();
     updateUI();
 
-    // clear inputs
     document.getElementById("amount").value = "";
     document.getElementById("desc").value = "";
 }
@@ -165,18 +42,15 @@ function updateUI() {
         let li = document.createElement("li");
 
         li.innerHTML = `
-            ${t.name} - ${t.desc} : 
+            ${t.name} - ${t.desc} :
             ${t.type === "income" ? "+" : "-"} RM${t.amount}
             <span class="delete" onclick="deleteTransaction(${t.id})">X</span>
         `;
 
         list.appendChild(li);
 
-        if (t.type === "income") {
-            income += t.amount;
-        } else {
-            expense += t.amount;
-        }
+        if (t.type === "income") income += t.amount;
+        else expense += t.amount;
     });
 
     document.getElementById("totalIncome").innerText = "RM " + income.toFixed(2);
@@ -186,9 +60,11 @@ function updateUI() {
 
 function deleteTransaction(id) {
     transactions = transactions.filter(t => t.id !== id);
+    saveData();
     updateUI();
 }
-</script>
 
-</body>
-</html>
+function saveData() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+</script>
