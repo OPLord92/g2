@@ -4,8 +4,13 @@
     <title>Money Saving Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Firebase (safe version) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
         body { font-family: Arial; background: #f4f6f9; padding: 20px; }
+
         .container {
             max-width: 600px;
             margin:auto;
@@ -14,27 +19,33 @@
             border-radius:10px;
             box-shadow:0 0 10px rgba(0,0,0,0.1);
         }
+
         input, select, button {
             width:100%;
             padding:10px;
             margin:8px 0;
         }
+
         button {
             background:#007bff;
             color:white;
             border:none;
             cursor:pointer;
         }
+
         .summary { display:flex; justify-content:space-between; }
+
         .box {
             width:30%;
             padding:10px;
             color:white;
             text-align:center;
         }
+
         .saving { background:green; }
         .expense { background:red; }
         .balance { background:black; }
+
         li {
             background:#eee;
             margin:5px 0;
@@ -42,6 +53,7 @@
             display:flex;
             justify-content:space-between;
         }
+
         .delete { color:red; cursor:pointer; }
     </style>
 </head>
@@ -49,7 +61,7 @@
 <body>
 
 <div class="container">
-    <h2>💰 Money Tracker</h2>
+    <h2>💰 Money Saving Tracker</h2>
 
     <input id="name" placeholder="Name">
     <input id="amount" type="number" placeholder="Amount">
@@ -82,9 +94,33 @@
 </div>
 
 <script>
+/* =========================
+   🔴 REPLACE THIS CONFIG
+========================= */
+var firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+// INIT FIREBASE
+try {
+    firebase.initializeApp(firebaseConfig);
+} catch (e) {}
+
+var db;
+try {
+    db = firebase.firestore();
+} catch (e) {
+    console.log("Firebase not available");
+}
+
+// LOCAL STORAGE
 let transactions = JSON.parse(localStorage.getItem("data")) || [];
 
-// ADD BUTTON FIX
+/* =========================
+   ADD BUTTON
+========================= */
 document.getElementById("addBtn").addEventListener("click", function () {
 
     let name = document.getElementById("name").value;
@@ -98,34 +134,104 @@ document.getElementById("addBtn").addEventListener("click", function () {
     }
 
     let t = {
-        id: Date.now(),
         name,
         amount: parseFloat(amount),
         type,
         desc
     };
 
-    transactions.push(t);
-    save();
-    render();
+    // FIREBASE SAVE
+    if (db) {
+        db.collection("transactions").add(t)
+        .then(() => {
+            loadFromFirebase();
+        })
+        .catch(() => {
+            fallbackLocal(t);
+        });
+    } else {
+        fallbackLocal(t);
+    }
 
     document.getElementById("amount").value = "";
     document.getElementById("desc").value = "";
 });
 
-// DELETE
+/* =========================
+   DELETE
+========================= */
 function deleteItem(id) {
-    transactions = transactions.filter(t => t.id !== id);
+
+    if (db && typeof id === "string") {
+        db.collection("transactions").doc(id).delete()
+        .then(() => {
+            loadFromFirebase();
+        })
+        .catch(() => {
+            deleteLocal(id);
+        });
+    } else {
+        deleteLocal(id);
+    }
+}
+
+function deleteLocal(id) {
+    transactions = transactions.filter(t => t.id != id);
     save();
     render();
 }
 
-// SAVE
+/* =========================
+   LOAD FROM FIREBASE
+========================= */
+function loadFromFirebase() {
+
+    if (!db) {
+        render();
+        return;
+    }
+
+    db.collection("transactions").get()
+    .then((querySnapshot) => {
+
+        transactions = [];
+
+        querySnapshot.forEach((doc) => {
+            transactions.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        save();
+        render();
+
+    })
+    .catch(() => {
+        render();
+    });
+}
+
+/* =========================
+   FALLBACK LOCAL
+========================= */
+function fallbackLocal(t) {
+    t.id = Date.now();
+    transactions.push(t);
+    save();
+    render();
+}
+
+/* =========================
+   SAVE LOCAL
+========================= */
 function save() {
     localStorage.setItem("data", JSON.stringify(transactions));
 }
 
-// RENDER
+/* =========================
+   RENDER UI
+========================= */
 function render() {
     let list = document.getElementById("list");
     list.innerHTML = "";
@@ -138,8 +244,12 @@ function render() {
         li.innerHTML = `
             ${t.name} - ${t.desc} :
             ${t.type === "income" ? "+" : "-"} RM${t.amount}
-            <span class="delete" onclick="deleteItem(${t.id})">X</span>
+            <span class="delete">X</span>
         `;
+
+        li.querySelector(".delete").addEventListener("click", () => {
+            deleteItem(t.id);
+        });
 
         list.appendChild(li);
 
@@ -152,8 +262,10 @@ function render() {
     document.getElementById("balance").innerText = (income - expense).toFixed(2);
 }
 
-// INIT
-render();
+/* =========================
+   INIT
+========================= */
+loadFromFirebase();
 </script>
 
 </body>
