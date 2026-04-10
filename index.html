@@ -52,7 +52,7 @@
 <body>
 
 <div class="container">
-    <h2>💰 Money Tracker</h2>
+    <h2>💰 Money Tracker (Cloud)</h2>
 
     <input id="name" placeholder="Name">
     <input id="amount" type="number" placeholder="Amount">
@@ -85,36 +85,37 @@
 </div>
 
 <script>
-// ==========================
 // 🔴 PUT YOUR FIREBASE CONFIG HERE
-// ==========================
 var firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_DOMAIN",
   projectId: "YOUR_PROJECT_ID"
 };
 
-// SAFE FIREBASE INIT
-let db = null;
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
 
-try {
-    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        console.log("Firebase connected");
-    } else {
-        console.log("Firebase config not set → using local storage");
-    }
-} catch (e) {
-    console.log("Firebase error → fallback local");
+let transactions = [];
+
+// LOAD FROM FIREBASE (REALTIME)
+function loadData() {
+    db.collection("transactions")
+    .onSnapshot(snapshot => {
+
+        transactions = [];
+
+        snapshot.forEach(doc => {
+            transactions.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        render();
+    });
 }
 
-// LOCAL DATA
-let transactions = JSON.parse(localStorage.getItem("data")) || [];
-
-// ==========================
-// ADD BUTTON (ALWAYS WORK)
-// ==========================
+// ADD
 document.getElementById("addBtn").addEventListener("click", function () {
 
     let name = document.getElementById("name").value;
@@ -127,86 +128,23 @@ document.getElementById("addBtn").addEventListener("click", function () {
         return;
     }
 
-    let t = {
+    db.collection("transactions").add({
         name,
         amount: parseFloat(amount),
         type,
         desc
-    };
-
-    // TRY FIREBASE
-    if (db) {
-        db.collection("transactions").add(t)
-        .then(() => loadFromFirebase())
-        .catch(() => saveLocal(t));
-    } else {
-        saveLocal(t);
-    }
+    });
 
     document.getElementById("amount").value = "";
     document.getElementById("desc").value = "";
 });
 
-// ==========================
-// LOCAL SAVE
-// ==========================
-function saveLocal(t) {
-    t.id = Date.now();
-    transactions.push(t);
-    localStorage.setItem("data", JSON.stringify(transactions));
-    render();
-}
-
-// ==========================
 // DELETE
-// ==========================
 function deleteItem(id) {
-
-    if (db && typeof id === "string") {
-        db.collection("transactions").doc(id).delete()
-        .then(() => loadFromFirebase())
-        .catch(() => deleteLocal(id));
-    } else {
-        deleteLocal(id);
-    }
+    db.collection("transactions").doc(id).delete();
 }
 
-function deleteLocal(id) {
-    transactions = transactions.filter(t => t.id != id);
-    localStorage.setItem("data", JSON.stringify(transactions));
-    render();
-}
-
-// ==========================
-// LOAD FIREBASE
-// ==========================
-function loadFromFirebase() {
-
-    if (!db) {
-        render();
-        return;
-    }
-
-    db.collection("transactions").get()
-    .then(snapshot => {
-        transactions = [];
-
-        snapshot.forEach(doc => {
-            transactions.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
-
-        localStorage.setItem("data", JSON.stringify(transactions));
-        render();
-    })
-    .catch(() => render());
-}
-
-// ==========================
 // UI
-// ==========================
 function render() {
     let list = document.getElementById("list");
     list.innerHTML = "";
@@ -237,8 +175,8 @@ function render() {
     document.getElementById("balance").innerText = (income - expense).toFixed(2);
 }
 
-// INIT
-loadFromFirebase();
+// START
+loadData();
 </script>
 
 </body>
