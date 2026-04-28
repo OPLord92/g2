@@ -58,7 +58,7 @@ border-radius:8px;
 }
 
 .saving{background:green;}
-.expense{background:red;}
+.expenses{background:red;}
 .balance{background:black;}
 
 ul{
@@ -119,7 +119,7 @@ transform:scale(1.2);
 <p id="income">0.00</p>
 </div>
 
-<div class="box expense">
+<div class="box expenses">
 <h4>Expenses</h4>
 <p id="expense">0.00</p>
 </div>
@@ -137,7 +137,6 @@ transform:scale(1.2);
 
 <script>
 
-// FIREBASE
 const firebaseConfig = {
 apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
 authDomain: "oplord-savings.firebaseapp.com",
@@ -153,14 +152,12 @@ try{
 firebase.initializeApp(firebaseConfig);
 db=firebase.firestore();
 }catch(e){
-console.log("Using Local Storage");
+console.log("Firebase not available, using local storage");
 }
 
 
-// DATA
 let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
-
 
 
 // ADD
@@ -202,12 +199,10 @@ clearInputs();
 
 });
 
-
 function clearInputs(){
 document.getElementById("amount").value="";
 document.getElementById("desc").value="";
 }
-
 
 
 // LOCAL SAVE
@@ -225,7 +220,6 @@ JSON.stringify(transactions)
 render();
 
 }
-
 
 
 // DELETE
@@ -247,13 +241,10 @@ deleteLocal(id);
 
 }
 
-
 function deleteLocal(id){
 
 transactions=
-transactions.filter(
-item=>item.id!=id
-);
+transactions.filter(item=>item.id!=id);
 
 localStorage.setItem(
 "moneyData",
@@ -263,7 +254,6 @@ JSON.stringify(transactions)
 render();
 
 }
-
 
 
 // LOAD FIREBASE
@@ -304,8 +294,7 @@ render();
 }
 
 
-
-// UI
+// RENDER
 function render(){
 
 let list=document.getElementById("list");
@@ -325,14 +314,11 @@ ${t.name} - ${t.desc}
 (${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
 </span>
 
-<span class="delete" title="Delete">🗑️</span>
+<span class="delete">🗑️</span>
 `;
 
 li.querySelector(".delete")
-.addEventListener(
-"click",
-()=>deleteItem(t.id)
-);
+.addEventListener("click",()=>deleteItem(t.id));
 
 list.appendChild(li);
 
@@ -354,7 +340,6 @@ document.getElementById("balance").innerText=
 (income-expense).toFixed(2);
 
 }
-
 
 loadFromFirebase();
 
