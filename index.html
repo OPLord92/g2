@@ -98,19 +98,18 @@ const firebaseConfig = {
   measurementId: "G-0N2S0KT129"
 };
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // SAFE FIREBASE INIT
 let db = null;
 
 try {
-    if (firebaseConfig.apiKey !== "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4") {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        console.log("Firebase connected");
-    } else {
-        console.log("Firebase config not set → using local storage");
-    }
-} catch (e) {
-    console.log("Firebase error → fallback local");
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log("Firebase connected successfully");
+} catch(e){
+    console.log("Firebase failed, using local storage");
 }
 
 // LOCAL DATA
