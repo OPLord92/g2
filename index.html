@@ -74,10 +74,32 @@ border-radius:8px;
 font-size:14px;
 }
 
+/* ===================== */
+/* 🗑️ DELETE ICON BOUNCE */
+/* ===================== */
+
 .delete{
 cursor:pointer;
-font-size:20px;
+font-size:22px;
+display:inline-block;
+transition:transform 0.2s ease;
 }
+
+/* hover animation */
+.delete:hover{
+animation:bounce 0.5s ease;
+transform:scale(1.3);
+}
+
+/* bounce keyframes */
+@keyframes bounce{
+0%   {transform:scale(1);}
+30%  {transform:scale(1.4);}
+50%  {transform:scale(0.9);}
+70%  {transform:scale(1.2);}
+100% {transform:scale(1.3);}
+}
+
 </style>
 </head>
 
@@ -128,7 +150,6 @@ font-size:20px;
 
 <script>
 
-// FIREBASE
 const firebaseConfig = {
 apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
 authDomain: "oplord-savings.firebaseapp.com",
@@ -148,7 +169,6 @@ console.log("Firebase fallback local storage");
 }
 
 
-// DATA
 let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
@@ -161,7 +181,6 @@ let amount=document.getElementById("amount").value;
 let type=document.getElementById("type").value;
 let desc=document.getElementById("desc").value.trim();
 
-// 📅 DATE
 let date=new Date().toLocaleDateString("en-GB");
 
 if(!amount || !desc){
@@ -178,11 +197,9 @@ desc:desc
 };
 
 if(db){
-
 db.collection("transactions").add(t)
 .then(()=>loadFromFirebase())
 .catch(()=>saveLocal(t));
-
 }else{
 saveLocal(t);
 }
