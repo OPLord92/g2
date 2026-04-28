@@ -80,8 +80,8 @@ border-radius:8px;
 .delete{
 cursor:pointer;
 font-size:22px;
-transition:.2s;
 user-select:none;
+transition:.2s;
 }
 
 .delete:hover{
@@ -103,9 +103,10 @@ transform:scale(1.2);
 
 <input id="amount" type="number" placeholder="Amount">
 
+<!-- UPDATED HERE -->
 <select id="type">
 <option value="income">Savings (+)</option>
-<option value="expense">Expense (-)</option>
+<option value="expense">Expenses (-)</option>
 </select>
 
 <input id="desc" placeholder="Purpose">
@@ -137,6 +138,7 @@ transform:scale(1.2);
 
 <script>
 
+// FIREBASE CONFIG
 const firebaseConfig = {
 apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
 authDomain: "oplord-savings.firebaseapp.com",
@@ -152,10 +154,11 @@ try{
 firebase.initializeApp(firebaseConfig);
 db=firebase.firestore();
 }catch(e){
-console.log("Firebase not available, using local storage");
+console.log("Firebase not connected, using local storage");
 }
 
 
+// DATA
 let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
