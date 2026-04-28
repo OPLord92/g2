@@ -39,10 +39,6 @@ border:none;
 cursor:pointer;
 }
 
-button:hover{
-opacity:.9;
-}
-
 .summary{
 display:flex;
 gap:10px;
@@ -70,22 +66,17 @@ margin-top:20px;
 li{
 background:#eee;
 margin:8px 0;
-padding:12px 15px;
+padding:12px;
 display:flex;
 justify-content:space-between;
 align-items:center;
 border-radius:8px;
+font-size:14px;
 }
 
 .delete{
 cursor:pointer;
-font-size:22px;
-user-select:none;
-transition:.2s;
-}
-
-.delete:hover{
-transform:scale(1.2);
+font-size:20px;
 }
 </style>
 </head>
@@ -103,7 +94,6 @@ transform:scale(1.2);
 
 <input id="amount" type="number" placeholder="Amount">
 
-<!-- UPDATED HERE -->
 <select id="type">
 <option value="income">Savings (+)</option>
 <option value="expense">Expenses (-)</option>
@@ -154,7 +144,7 @@ try{
 firebase.initializeApp(firebaseConfig);
 db=firebase.firestore();
 }catch(e){
-console.log("Firebase not connected, using local storage");
+console.log("Firebase fallback local storage");
 }
 
 
@@ -163,13 +153,16 @@ let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
 
-// ADD
+// ADD BUTTON
 document.getElementById("addBtn").addEventListener("click",function(){
 
 let name=document.getElementById("name").value;
 let amount=document.getElementById("amount").value;
 let type=document.getElementById("type").value;
 let desc=document.getElementById("desc").value.trim();
+
+// 🟡 AUTO DATE
+let date=new Date().toLocaleDateString("en-GB");
 
 if(!amount || !desc){
 alert("Fill all fields");
@@ -178,6 +171,7 @@ return;
 
 let t={
 name:name,
+date:date,
 amount:parseFloat(amount),
 type:type,
 desc:desc
@@ -215,10 +209,7 @@ t.id=Date.now();
 
 transactions.push(t);
 
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
+localStorage.setItem("moneyData",JSON.stringify(transactions));
 
 render();
 
@@ -234,9 +225,7 @@ db.collection("transactions")
 .doc(id)
 .delete()
 .then(loadFromFirebase)
-.catch(function(){
-deleteLocal(id);
-});
+.catch(()=>deleteLocal(id));
 
 }else{
 deleteLocal(id);
@@ -249,10 +238,7 @@ function deleteLocal(id){
 transactions=
 transactions.filter(item=>item.id!=id);
 
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
+localStorage.setItem("moneyData",JSON.stringify(transactions));
 
 render();
 
@@ -269,11 +255,11 @@ return;
 
 db.collection("transactions")
 .get()
-.then(function(snapshot){
+.then(snapshot=>{
 
 transactions=[];
 
-snapshot.forEach(function(doc){
+snapshot.forEach(doc=>{
 
 transactions.push({
 id:doc.id,
@@ -282,17 +268,12 @@ id:doc.id,
 
 });
 
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
+localStorage.setItem("moneyData",JSON.stringify(transactions));
 
 render();
 
 })
-.catch(function(){
-render();
-});
+.catch(()=>render());
 
 }
 
@@ -306,14 +287,13 @@ list.innerHTML="";
 let income=0;
 let expense=0;
 
-transactions.forEach(function(t){
+transactions.forEach(t=>{
 
 let li=document.createElement("li");
 
-li.innerHTML=
-`
+li.innerHTML=`
 <span>
-${t.name} - ${t.desc}
+<b>${t.name}</b> | ${t.date} | ${t.desc}
 (${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
 </span>
 
@@ -325,22 +305,14 @@ li.querySelector(".delete")
 
 list.appendChild(li);
 
-if(t.type==="income"){
-income+=t.amount;
-}else{
-expense+=t.amount;
-}
+if(t.type==="income") income+=t.amount;
+else expense+=t.amount;
 
 });
 
-document.getElementById("income").innerText=
-income.toFixed(2);
-
-document.getElementById("expense").innerText=
-expense.toFixed(2);
-
-document.getElementById("balance").innerText=
-(income-expense).toFixed(2);
+document.getElementById("income").innerText=income.toFixed(2);
+document.getElementById("expense").innerText=expense.toFixed(2);
+document.getElementById("balance").innerText=(income-expense).toFixed(2);
 
 }
 
