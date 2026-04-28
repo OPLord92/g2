@@ -1,247 +1,380 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Money Saving Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Money Saving Tracker</title>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <style>
-        body { font-family: Arial; background: #f4f6f9; padding: 20px; }
-        .container {
-            max-width: 600px;
-            margin:auto;
-            background:white;
-            padding:20px;
-            border-radius:10px;
-        }
-        input, select, button {
-            width:100%;
-            padding:10px;
-            margin:8px 0;
-        }
-        button {
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
-        }
-        .summary { display:flex; justify-content:space-between; }
-        .box {
-            width:30%;
-            padding:10px;
-            color:white;
-            text-align:center;
-        }
-        .saving { background:green; }
-        .expense { background:red; }
-        .balance { background:black; }
-        li {
-            background:#eee;
-            margin:5px 0;
-            padding:10px;
-            display:flex;
-            justify-content:space-between;
-        }
-        .delete { color:red; cursor:pointer; }
-    </style>
+<style>
+body{
+font-family:Arial;
+background:#f4f6f9;
+padding:20px;
+}
+
+.container{
+max-width:650px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+input,select,button{
+width:100%;
+padding:12px;
+margin:8px 0;
+box-sizing:border-box;
+}
+
+button{
+background:#007bff;
+color:white;
+border:none;
+cursor:pointer;
+font-size:16px;
+}
+
+button:hover{
+opacity:.9;
+}
+
+.summary{
+display:flex;
+gap:10px;
+margin-top:20px;
+}
+
+.box{
+flex:1;
+padding:12px;
+text-align:center;
+color:white;
+border-radius:8px;
+}
+
+.saving{background:green;}
+.expense{background:red;}
+.balance{background:black;}
+
+ul{
+list-style:none;
+padding:0;
+margin-top:20px;
+}
+
+li{
+background:#eee;
+margin:8px 0;
+padding:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-radius:8px;
+}
+
+.delete{
+color:red;
+font-weight:bold;
+cursor:pointer;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
-    <h2>💰 Money Tracker</h2>
 
-    <input id="name" placeholder="Name">
-    <input id="amount" type="number" placeholder="Amount">
+<h2>💰 Money Tracker</h2>
 
-    <select id="type">
-        <option value="income">Savings (+)</option>
-        <option value="expense">Expense (-)</option>
-    </select>
+<input id="name" placeholder="Name">
+<input id="amount" type="number" placeholder="Amount">
 
-    <input id="desc" placeholder="Purpose">
+<select id="type">
+<option value="income">Savings (+)</option>
+<option value="expense">Expense (-)</option>
+</select>
 
-    <button id="addBtn">Add</button>
+<input id="desc" placeholder="Purpose">
 
-    <div class="summary">
-        <div class="box saving">
-            <h4>Savings</h4>
-            <p id="income">0</p>
-        </div>
-        <div class="box expense">
-            <h4>Expenses</h4>
-            <p id="expense">0</p>
-        </div>
-        <div class="box balance">
-            <h4>Balance</h4>
-            <p id="balance">0</p>
-        </div>
-    </div>
+<button id="addBtn">Add</button>
 
-    <ul id="list"></ul>
+<div class="summary">
+
+<div class="box saving">
+<h4>Savings</h4>
+<p id="income">0.00</p>
+</div>
+
+<div class="box expense">
+<h4>Expenses</h4>
+<p id="expense">0.00</p>
+</div>
+
+<div class="box balance">
+<h4>Balance</h4>
+<p id="balance">0.00</p>
+</div>
+
+</div>
+
+<ul id="list"></ul>
+
 </div>
 
 <script>
-// ==========================
-// 🔴 PUT YOUR FIREBASE CONFIG HERE
-// ==========================
+
+// ====================
+// FIREBASE CONFIG
+// ====================
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
-  authDomain: "oplord-savings.firebaseapp.com",
-  projectId: "oplord-savings",
-  storageBucket: "oplord-savings.firebasestorage.app",
-  messagingSenderId: "1794473489",
-  appId: "1:1794473489:web:6056cb5e3cef91bb60bbb0",
-  measurementId: "G-0N2S0KT129"
+apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
+authDomain: "oplord-savings.firebaseapp.com",
+projectId: "oplord-savings",
+storageBucket: "oplord-savings.firebasestorage.app",
+messagingSenderId: "1794473489",
+appId: "1:1794473489:web:6056cb5e3cef91bb60bbb0"
 };
 
+let db=null;
+
+try{
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// SAFE FIREBASE INIT
-let db = null;
-
-try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    console.log("Firebase connected successfully");
-} catch(e){
-    console.log("Firebase failed, using local storage");
+db=firebase.firestore();
+console.log("Firebase Connected");
+}catch(e){
+console.log("Using Local Storage Only");
 }
 
-// LOCAL DATA
-let transactions = JSON.parse(localStorage.getItem("data")) || [];
 
-// ==========================
-// ADD BUTTON (ALWAYS WORK)
-// ==========================
-document.getElementById("addBtn").addEventListener("click", function () {
+// ====================
+// DATA
+// ====================
 
-    let name = document.getElementById("name").value;
-    let amount = document.getElementById("amount").value;
-    let type = document.getElementById("type").value;
-    let desc = document.getElementById("desc").value;
+let transactions=
+JSON.parse(localStorage.getItem("moneyData")) || [];
 
-    if (!name || !amount || !desc) {
-        alert("Fill all fields");
-        return;
-    }
 
-    let t = {
-        name,
-        amount: parseFloat(amount),
-        type,
-        desc
-    };
+// ====================
+// ADD BUTTON
+// ====================
 
-    // TRY FIREBASE
-    if (db) {
-        db.collection("transactions").add(t)
-        .then(() => loadFromFirebase())
-        .catch(() => saveLocal(t));
-    } else {
-        saveLocal(t);
-    }
+document.getElementById("addBtn").addEventListener("click",function(){
 
-    document.getElementById("amount").value = "";
-    document.getElementById("desc").value = "";
+let name=document.getElementById("name").value.trim();
+let amount=document.getElementById("amount").value;
+let type=document.getElementById("type").value;
+let desc=document.getElementById("desc").value.trim();
+
+if(!name || !amount || !desc){
+alert("Fill all fields");
+return;
+}
+
+let t={
+name:name,
+amount:parseFloat(amount),
+type:type,
+desc:desc
+};
+
+
+if(db){
+
+db.collection("transactions").add(t)
+.then(function(){
+loadFromFirebase();
+clearInputs();
+})
+.catch(function(error){
+console.log(error);
+saveLocal(t);
+clearInputs();
 });
 
-// ==========================
+}else{
+
+saveLocal(t);
+clearInputs();
+
+}
+
+});
+
+function clearInputs(){
+document.getElementById("name").value="";
+document.getElementById("amount").value="";
+document.getElementById("desc").value="";
+}
+
+
+// ====================
 // LOCAL SAVE
-// ==========================
-function saveLocal(t) {
-    t.id = Date.now();
-    transactions.push(t);
-    localStorage.setItem("data", JSON.stringify(transactions));
-    render();
+// ====================
+
+function saveLocal(t){
+
+t.id=Date.now();
+
+transactions.push(t);
+
+localStorage.setItem(
+"moneyData",
+JSON.stringify(transactions)
+);
+
+render();
+
 }
 
-// ==========================
+
+// ====================
 // DELETE
-// ==========================
-function deleteItem(id) {
+// ====================
 
-    if (db && typeof id === "string") {
-        db.collection("transactions").doc(id).delete()
-        .then(() => loadFromFirebase())
-        .catch(() => deleteLocal(id));
-    } else {
-        deleteLocal(id);
-    }
+function deleteItem(id){
+
+if(db && typeof id==="string"){
+
+db.collection("transactions")
+.doc(id)
+.delete()
+.then(loadFromFirebase)
+.catch(function(){
+deleteLocal(id);
+});
+
+}else{
+
+deleteLocal(id);
+
 }
 
-function deleteLocal(id) {
-    transactions = transactions.filter(t => t.id != id);
-    localStorage.setItem("data", JSON.stringify(transactions));
-    render();
 }
 
-// ==========================
-// LOAD FIREBASE
-// ==========================
-function loadFromFirebase() {
+function deleteLocal(id){
 
-    if (!db) {
-        render();
-        return;
-    }
+transactions=
+transactions.filter(
+item=>item.id!=id
+);
 
-    db.collection("transactions").get()
-    .then(snapshot => {
-        transactions = [];
+localStorage.setItem(
+"moneyData",
+JSON.stringify(transactions)
+);
 
-        snapshot.forEach(doc => {
-            transactions.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
+render();
 
-        localStorage.setItem("data", JSON.stringify(transactions));
-        render();
-    })
-    .catch(() => render());
 }
 
-// ==========================
-// UI
-// ==========================
-function render() {
-    let list = document.getElementById("list");
-    list.innerHTML = "";
 
-    let income = 0, expense = 0;
+// ====================
+// FIREBASE LOAD
+// ====================
 
-    transactions.forEach(t => {
-        let li = document.createElement("li");
+function loadFromFirebase(){
 
-        li.innerHTML = `
-            ${t.name} - ${t.desc} :
-            ${t.type === "income" ? "+" : "-"} RM${t.amount}
-            <span class="delete">X</span>
-        `;
-
-        li.querySelector(".delete").addEventListener("click", () => {
-            deleteItem(t.id);
-        });
-
-        list.appendChild(li);
-
-        if (t.type === "income") income += t.amount;
-        else expense += t.amount;
-    });
-
-    document.getElementById("income").innerText = income.toFixed(2);
-    document.getElementById("expense").innerText = expense.toFixed(2);
-    document.getElementById("balance").innerText = (income - expense).toFixed(2);
+if(!db){
+render();
+return;
 }
 
-// INIT
+db.collection("transactions")
+.get()
+.then(function(snapshot){
+
+transactions=[];
+
+snapshot.forEach(function(doc){
+
+transactions.push({
+id:doc.id,
+...doc.data()
+});
+
+});
+
+localStorage.setItem(
+"moneyData",
+JSON.stringify(transactions)
+);
+
+render();
+
+})
+.catch(function(){
+render();
+});
+
+}
+
+
+// ====================
+// RENDER
+// ====================
+
+function render(){
+
+let list=
+document.getElementById("list");
+
+list.innerHTML="";
+
+let income=0;
+let expense=0;
+
+transactions.forEach(function(t){
+
+let li=
+document.createElement("li");
+
+li.innerHTML=
+`
+<span>
+${t.name} - ${t.desc}
+(${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
+</span>
+
+<span class="delete">X</span>
+`;
+
+li.querySelector(".delete")
+.addEventListener(
+"click",
+()=>deleteItem(t.id)
+);
+
+list.appendChild(li);
+
+if(t.type==="income"){
+income+=t.amount;
+}else{
+expense+=t.amount;
+}
+
+});
+
+document.getElementById("income").innerText=
+income.toFixed(2);
+
+document.getElementById("expense").innerText=
+expense.toFixed(2);
+
+document.getElementById("balance").innerText=
+(income-expense).toFixed(2);
+
+}
+
+
+// INITIAL LOAD
 loadFromFirebase();
+
 </script>
 
 </body>
