@@ -70,7 +70,7 @@ margin-top:20px;
 li{
 background:#eee;
 margin:8px 0;
-padding:12px;
+padding:12px 15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -78,9 +78,14 @@ border-radius:8px;
 }
 
 .delete{
-color:red;
-font-weight:bold;
 cursor:pointer;
+font-size:22px;
+transition:.2s;
+user-select:none;
+}
+
+.delete:hover{
+transform:scale(1.2);
 }
 </style>
 </head>
@@ -91,7 +96,6 @@ cursor:pointer;
 
 <h2>💰 Money Tracker</h2>
 
-<!-- NAME DROPDOWN -->
 <select id="name">
 <option value="Gary">Gary</option>
 <option value="Kiki">Kiki</option>
@@ -133,7 +137,7 @@ cursor:pointer;
 
 <script>
 
-// FIREBASE CONFIG
+// FIREBASE
 const firebaseConfig = {
 apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
 authDomain: "oplord-savings.firebaseapp.com",
@@ -148,7 +152,6 @@ let db=null;
 try{
 firebase.initializeApp(firebaseConfig);
 db=firebase.firestore();
-console.log("Firebase Connected");
 }catch(e){
 console.log("Using Local Storage");
 }
@@ -159,7 +162,8 @@ let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
 
-// ADD BUTTON
+
+// ADD
 document.getElementById("addBtn").addEventListener("click",function(){
 
 let name=document.getElementById("name").value;
@@ -179,7 +183,6 @@ type:type,
 desc:desc
 };
 
-
 if(db){
 
 db.collection("transactions").add(t)
@@ -193,18 +196,18 @@ clearInputs();
 });
 
 }else{
-
 saveLocal(t);
 clearInputs();
-
 }
 
 });
+
 
 function clearInputs(){
 document.getElementById("amount").value="";
 document.getElementById("desc").value="";
 }
+
 
 
 // LOCAL SAVE
@@ -224,6 +227,7 @@ render();
 }
 
 
+
 // DELETE
 function deleteItem(id){
 
@@ -238,12 +242,11 @@ deleteLocal(id);
 });
 
 }else{
-
 deleteLocal(id);
-
 }
 
 }
+
 
 function deleteLocal(id){
 
@@ -262,7 +265,8 @@ render();
 }
 
 
-// FIREBASE LOAD
+
+// LOAD FIREBASE
 function loadFromFirebase(){
 
 if(!db){
@@ -300,12 +304,11 @@ render();
 }
 
 
-// RENDER
+
+// UI
 function render(){
 
-let list=
-document.getElementById("list");
-
+let list=document.getElementById("list");
 list.innerHTML="";
 
 let income=0;
@@ -322,7 +325,7 @@ ${t.name} - ${t.desc}
 (${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
 </span>
 
-<span class="delete">X</span>
+<span class="delete" title="Delete">🗑️</span>
 `;
 
 li.querySelector(".delete")
@@ -353,7 +356,6 @@ document.getElementById("balance").innerText=
 }
 
 
-// INIT
 loadFromFirebase();
 
 </script>
