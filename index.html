@@ -88,17 +88,21 @@
 // ==========================
 // 🔴 PUT YOUR FIREBASE CONFIG HERE
 // ==========================
-var firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
+  authDomain: "oplord-savings.firebaseapp.com",
+  projectId: "oplord-savings",
+  storageBucket: "oplord-savings.firebasestorage.app",
+  messagingSenderId: "1794473489",
+  appId: "1:1794473489:web:6056cb5e3cef91bb60bbb0",
+  measurementId: "G-0N2S0KT129"
 };
 
 // SAFE FIREBASE INIT
 let db = null;
 
 try {
-    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    if (firebaseConfig.apiKey !== "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4") {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         console.log("Firebase connected");
