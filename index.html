@@ -29,6 +29,7 @@ width:100%;
 padding:12px;
 margin:8px 0;
 box-sizing:border-box;
+font-size:16px;
 }
 
 button{
@@ -36,7 +37,6 @@ background:#007bff;
 color:white;
 border:none;
 cursor:pointer;
-font-size:16px;
 }
 
 button:hover{
@@ -91,7 +91,12 @@ cursor:pointer;
 
 <h2>💰 Money Tracker</h2>
 
-<input id="name" placeholder="Name">
+<!-- NAME DROPDOWN -->
+<select id="name">
+<option value="Gary">Gary</option>
+<option value="Kiki">Kiki</option>
+</select>
+
 <input id="amount" type="number" placeholder="Amount">
 
 <select id="type">
@@ -128,10 +133,7 @@ cursor:pointer;
 
 <script>
 
-// ====================
 // FIREBASE CONFIG
-// ====================
-
 const firebaseConfig = {
 apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
 authDomain: "oplord-savings.firebaseapp.com",
@@ -148,30 +150,24 @@ firebase.initializeApp(firebaseConfig);
 db=firebase.firestore();
 console.log("Firebase Connected");
 }catch(e){
-console.log("Using Local Storage Only");
+console.log("Using Local Storage");
 }
 
 
-// ====================
 // DATA
-// ====================
-
 let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
 
-// ====================
 // ADD BUTTON
-// ====================
-
 document.getElementById("addBtn").addEventListener("click",function(){
 
-let name=document.getElementById("name").value.trim();
+let name=document.getElementById("name").value;
 let amount=document.getElementById("amount").value;
 let type=document.getElementById("type").value;
 let desc=document.getElementById("desc").value.trim();
 
-if(!name || !amount || !desc){
+if(!amount || !desc){
 alert("Fill all fields");
 return;
 }
@@ -191,8 +187,7 @@ db.collection("transactions").add(t)
 loadFromFirebase();
 clearInputs();
 })
-.catch(function(error){
-console.log(error);
+.catch(function(){
 saveLocal(t);
 clearInputs();
 });
@@ -207,16 +202,12 @@ clearInputs();
 });
 
 function clearInputs(){
-document.getElementById("name").value="";
 document.getElementById("amount").value="";
 document.getElementById("desc").value="";
 }
 
 
-// ====================
 // LOCAL SAVE
-// ====================
-
 function saveLocal(t){
 
 t.id=Date.now();
@@ -233,10 +224,7 @@ render();
 }
 
 
-// ====================
 // DELETE
-// ====================
-
 function deleteItem(id){
 
 if(db && typeof id==="string"){
@@ -274,10 +262,7 @@ render();
 }
 
 
-// ====================
 // FIREBASE LOAD
-// ====================
-
 function loadFromFirebase(){
 
 if(!db){
@@ -315,10 +300,7 @@ render();
 }
 
 
-// ====================
 // RENDER
-// ====================
-
 function render(){
 
 let list=
@@ -331,8 +313,7 @@ let expense=0;
 
 transactions.forEach(function(t){
 
-let li=
-document.createElement("li");
+let li=document.createElement("li");
 
 li.innerHTML=
 `
@@ -372,7 +353,7 @@ document.getElementById("balance").innerText=
 }
 
 
-// INITIAL LOAD
+// INIT
 loadFromFirebase();
 
 </script>
