@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="UTF-8">
@@ -115,21 +116,22 @@ font-size:14px;
 
 
 
-/* DELETE ICON */
+
+/* DELETE BUTTON */
 
 .delete{
 
 cursor:pointer;
 font-size:22px;
 display:inline-block;
-transition:transform 0.2s ease;
+transition:transform .2s;
 
 }
 
 
 .delete:hover{
 
-animation:bounce 0.5s ease;
+animation:bounce .5s ease;
 transform:scale(1.3);
 
 }
@@ -147,7 +149,7 @@ transform:scale(1.4);
 }
 
 50%{
-transform:scale(0.9);
+transform:scale(.9);
 }
 
 70%{
@@ -161,66 +163,139 @@ transform:scale(1.3);
 }
 
 
+
+/* OPENING BALANCE STYLE */
+
+.opening{
+
+background:#fff3cd;
+border-left:5px solid orange;
+
+}
+
+
+
 </style>
+
 
 </head>
 
+
 <body>
+
 
 <div class="container">
 
+
 <h2>💰 Money Tracker</h2>
+
+
 
 <select id="name">
 
-<option value="Gary">Gary</option>
+<option value="Gary">
+Gary
+</option>
 
-<option value="Kiki">Kiki</option>
+
+<option value="Kiki">
+Kiki
+</option>
+
 
 </select>
+
+
 
 <input id="amount" type="number" placeholder="Amount">
 
+
+
 <select id="type">
 
-<option value="income">Savings (+)</option>
+<option value="income">
+Savings (+)
+</option>
 
-<option value="expense">Expenses (-)</option>
+
+<option value="expense">
+Expenses (-)
+</option>
+
 
 </select>
 
+
+
 <input id="desc" placeholder="Purpose">
+
+
 
 <button id="addBtn">
 Add
 </button>
 
+
+
+
+
 <div class="summary">
+
 
 <div class="box saving">
 
 <h4>Savings</h4>
 
-<p id="income">0.00</p>
+<p id="income">
+0.00
+</p>
 
 </div>
+
+
+
 
 <div class="box expenses">
 
 <h4>Expenses</h4>
 
-<p id="expense">0.00</p>
+<p id="expense">
+0.00
+</p>
 
 </div>
+
+
+
 
 <div class="box balance">
+
 <h4>Balance</h4>
-<p id="balance">0.00</p>
+
+<p id="balance">
+0.00
+</p>
+
 </div>
+
+
 </div>
+
+
+
+
 <ul id="list"></ul>
+
+
+
 </div>
+
+
+
+
+
 <script>
+
 
 const firebaseConfig = {
 
@@ -238,7 +313,11 @@ appId:"1:1794473489:web:6056cb5e3cef91bb60bbb0"
 
 };
 
+
+
 let db=null;
+
+
 
 try{
 
@@ -250,14 +329,18 @@ db=firebase.firestore();
 
 catch(e){
 
-console.log("Firebase fallback");
+console.log("Firebase unavailable");
 
 }
+
+
 
 let transactions =
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
+
 // ADD TRANSACTION
+
 document.getElementById("addBtn")
 .addEventListener("click",function(){
 
@@ -270,7 +353,11 @@ let type=document.getElementById("type").value;
 
 let desc=document.getElementById("desc").value.trim();
 
+
+
 let date=new Date().toLocaleDateString("en-GB");
+
+
 
 if(!amount || !desc){
 
@@ -279,6 +366,8 @@ alert("Fill all fields");
 return;
 
 }
+
+
 
 let t={
 
@@ -294,52 +383,98 @@ desc:desc
 
 };
 
+
+
+
 if(db){
+
 
 db.collection("transactions")
 .add(t)
 .then(loadFromFirebase)
 .catch(()=>saveLocal(t));
 
+
 }
 else{
 
+
 saveLocal(t);
+
 
 }
 
+
+
 clearInputs();
+
+
 
 });
 
+
+
+
+
+
 function clearInputs(){
+
 
 document.getElementById("amount").value="";
 
 document.getElementById("desc").value="";
 
+
 }
 
+
+
+
+
+
+
+
 // SAVE LOCAL
+
 function saveLocal(t){
+
 
 t.id=Date.now();
 
+
 transactions.push(t);
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
+
 
 }
 
-// DELETE
+
+
+
+
+
+
+
+
+// DELETE TRANSACTION
+
 function deleteItem(id){
 
+
+
 if(db && typeof id==="string"){
+
+
 
 db.collection("transactions")
 .doc(id)
@@ -347,39 +482,202 @@ db.collection("transactions")
 .then(loadFromFirebase)
 .catch(()=>deleteLocal(id));
 
+
+
 }
+
 else{
+
 
 deleteLocal(id);
 
-}
 
 }
+
+
+
+}
+
+
+
+
+
 
 function deleteLocal(id){
 
+
+
 transactions =
 transactions.filter(item=>item.id!=id);
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
+
+
+
 }
 
+
+
+
+
+
+
+
+
+// CREATE MONTHLY OPENING BALANCE
+
+
+function createOpeningBalance(){
+
+
+
+let now=new Date();
+
+
+
+let currentMonth=now.getMonth();
+
+let currentYear=now.getFullYear();
+
+
+
+
+let openingKey=
+"opening_"+currentYear+"_"+currentMonth;
+
+
+
+// already created
+
+if(localStorage.getItem(openingKey)){
+
+return;
+
+}
+
+
+
+
+let balance=0;
+
+
+
+// calculate current balance
+
+transactions.forEach(t=>{
+
+
+if(t.opening){
+
+balance+=t.amount;
+
+}
+
+else if(t.type==="income"){
+
+balance+=t.amount;
+
+}
+
+else{
+
+balance-=t.amount;
+
+}
+
+
+});
+
+
+
+
+
+
+
+let opening={
+
+
+name:"System",
+
+
+date:
+"01/"+
+String(currentMonth+1).padStart(2,"0")+
+"/"+
+currentYear,
+
+
+amount:balance,
+
+
+type:"income",
+
+
+desc:"Opening Balance",
+
+
+id:openingKey,
+
+
+opening:true
+
+
+
+};
+
+
+
+
+
+
+transactions.push(opening);
+
+
+
+
+
+localStorage.setItem(
+openingKey,
+JSON.stringify(opening)
+);
+
+
+
+localStorage.setItem(
+"moneyData",
+JSON.stringify(transactions)
+);
+
+}
+
+
 // LOAD FIREBASE
+
 function loadFromFirebase(){
 
+
 if(!db){
+
+createOpeningBalance();
 
 render();
 
 return;
 
 }
-  
+
+
+
+
 db.collection("transactions")
 .get()
 
@@ -387,6 +685,8 @@ db.collection("transactions")
 
 
 transactions=[];
+
+
 
 snapshot.forEach(doc=>{
 
@@ -399,69 +699,176 @@ id:doc.id,
 
 });
 
+
 });
+
+
+
+
+// create opening balance
+
+createOpeningBalance();
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
+
+
 
 })
 
 .catch(()=>{
 
+
+createOpeningBalance();
+
 render();
+
+
 });
+
+
+
 }
 
-// DISPLAY TRANSACTIONS
-// LATEST DATE FIRST
+
+
+
+
+
+
+
+
+// RENDER LIST
+
 function render(){
+
 
 let list=document.getElementById("list");
 
+
 list.innerHTML="";
+
+
 
 let income=0;
 
 let expense=0;
 
-// SORT BY DATE
-// NEWEST TRANSACTION AT TOP
+
+
+
+
+// LATEST DATE FIRST
 
 transactions.sort((a,b)=>{
+
+
+// opening balance always top
+
+if(a.opening) return -1;
+
+if(b.opening) return 1;
+
+
 
 let dateA=a.date.split("/").reverse().join("-");
 
 let dateB=b.date.split("/").reverse().join("-");
 
+
+
 return new Date(dateB)-new Date(dateA);
+
+
 
 });
 
+
+
+
+
+
+
 transactions.forEach(t=>{
 
+
+
 let li=document.createElement("li");
+
+
+
+
+// opening balance style
+
+if(t.opening){
+
+li.className="opening";
+
+}
+
+
+
 
 li.innerHTML=`
 
 <span>
 
-📅 ${t.date} |
 
-<b>${t.name}</b> |
+${t.opening ? "📌" : "📅"}
+
+${t.date}
+
+|
+
+<b>${t.name}</b>
+
+|
 
 ${t.desc}
 
 (${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
 
+
+
 </span>
 
-<span class="delete">🗑️</span>
+
+<span class="delete">
+
+🗑️
+
+</span>
+
 
 `;
+
+
+
+
+
+
+
+// hide delete for opening balance
+
+if(t.opening){
+
+
+li.querySelector(".delete")
+.style.display="none";
+
+
+}
+
+else{
+
 
 li.querySelector(".delete")
 .addEventListener(
@@ -469,27 +876,60 @@ li.querySelector(".delete")
 ()=>deleteItem(t.id)
 );
 
+
+
+}
+
+
+
+
+
+
+
 list.appendChild(li);
 
+
+
+
+
+
+
+
 if(t.type==="income"){
+
+
 income+=t.amount;
+
+
 }
+
 else{
+
+
 expense+=t.amount;
+
+
 }
+
 });
 
 document.getElementById("income")
 .innerText=income.toFixed(2);
 
+
+
 document.getElementById("expense")
 .innerText=expense.toFixed(2);
 
+
+
 document.getElementById("balance")
 .innerText=(income-expense).toFixed(2);
+
 }
 
-// START PROGRAM
+// START APPLICATION
+
 loadFromFirebase();
 
 </script>
