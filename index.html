@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Money Saving Tracker</title>
+
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 
 <style>
 
@@ -15,6 +19,7 @@ font-family:Arial;
 background:#f4f6f9;
 padding:20px;
 }
+
 
 .container{
 max-width:650px;
@@ -25,84 +30,141 @@ border-radius:12px;
 box-shadow:0 3px 10px rgba(0,0,0,.08);
 }
 
+
 input,select,button{
+
 width:100%;
 padding:12px;
 margin:8px 0;
 box-sizing:border-box;
 font-size:16px;
+
 }
 
+
 button{
+
 background:#007bff;
 color:white;
 border:none;
 cursor:pointer;
+
 }
 
+
 .summary{
+
 display:flex;
 gap:10px;
 margin-top:20px;
+
 }
 
+
 .box{
+
 flex:1;
 padding:12px;
 text-align:center;
 color:white;
 border-radius:8px;
+
 }
 
-.saving{background:green;}
-.expenses{background:red;}
-.balance{background:black;}
+
+.saving{
+background:green;
+}
+
+
+.expenses{
+background:red;
+}
+
+
+.balance{
+background:black;
+}
+
+
 
 ul{
+
 list-style:none;
 padding:0;
 margin-top:20px;
+
 }
 
+
 li{
+
 background:#eee;
 margin:8px 0;
 padding:12px;
+
 display:flex;
 justify-content:space-between;
 align-items:center;
+
 border-radius:8px;
+
 font-size:14px;
+
 }
+
 
 
 /* DELETE ICON */
 
 .delete{
+
 cursor:pointer;
 font-size:22px;
 display:inline-block;
 transition:transform 0.2s ease;
+
 }
 
+
 .delete:hover{
+
 animation:bounce 0.5s ease;
 transform:scale(1.3);
+
 }
+
+
 
 @keyframes bounce{
 
-0%{transform:scale(1);}
-30%{transform:scale(1.4);}
-50%{transform:scale(0.9);}
-70%{transform:scale(1.2);}
-100%{transform:scale(1.3);}
+0%{
+transform:scale(1);
+}
+
+30%{
+transform:scale(1.4);
+}
+
+50%{
+transform:scale(0.9);
+}
+
+70%{
+transform:scale(1.2);
+}
+
+100%{
+transform:scale(1.3);
+}
 
 }
+
 
 </style>
 
 </head>
+
 
 
 <body>
@@ -110,32 +172,43 @@ transform:scale(1.3);
 
 <div class="container">
 
+
 <h2>💰 Money Tracker</h2>
+
 
 
 <select id="name">
 
 <option value="Gary">Gary</option>
+
 <option value="Kiki">Kiki</option>
 
 </select>
 
 
+
 <input id="amount" type="number" placeholder="Amount">
+
 
 
 <select id="type">
 
 <option value="income">Savings (+)</option>
+
 <option value="expense">Expenses (-)</option>
 
 </select>
 
 
+
 <input id="desc" placeholder="Purpose">
 
 
-<button id="addBtn">Add</button>
+
+<button id="addBtn">
+Add
+</button>
+
 
 
 
@@ -145,22 +218,28 @@ transform:scale(1.3);
 <div class="box saving">
 
 <h4>Savings</h4>
+
 <p id="income">0.00</p>
 
 </div>
 
 
+
 <div class="box expenses">
 
 <h4>Expenses</h4>
+
 <p id="expense">0.00</p>
 
 </div>
 
 
+
+
 <div class="box balance">
 
 <h4>Balance</h4>
+
 <p id="balance">0.00</p>
 
 </div>
@@ -169,10 +248,14 @@ transform:scale(1.3);
 </div>
 
 
+
+
 <ul id="list"></ul>
 
 
+
 </div>
+
 
 
 
@@ -201,6 +284,7 @@ appId:"1:1794473489:web:6056cb5e3cef91bb60bbb0"
 let db=null;
 
 
+
 try{
 
 firebase.initializeApp(firebaseConfig);
@@ -211,9 +295,10 @@ db=firebase.firestore();
 
 catch(e){
 
-console.log("Firebase unavailable");
+console.log("Firebase fallback");
 
 }
+
 
 
 
@@ -224,7 +309,9 @@ JSON.parse(localStorage.getItem("moneyData")) || [];
 
 
 
+
 // ADD TRANSACTION
+
 
 document.getElementById("addBtn")
 .addEventListener("click",function(){
@@ -237,6 +324,7 @@ let amount=document.getElementById("amount").value;
 let type=document.getElementById("type").value;
 
 let desc=document.getElementById("desc").value.trim();
+
 
 
 let date=new Date().toLocaleDateString("en-GB");
@@ -269,6 +357,7 @@ desc:desc
 
 
 
+
 if(db){
 
 db.collection("transactions")
@@ -278,7 +367,6 @@ db.collection("transactions")
 
 
 }
-
 else{
 
 saveLocal(t);
@@ -288,7 +376,6 @@ saveLocal(t);
 
 
 clearInputs();
-
 
 
 });
@@ -309,20 +396,29 @@ document.getElementById("desc").value="";
 
 
 
-// LOCAL SAVE
+
+// SAVE LOCAL
+
 
 function saveLocal(t){
 
+
 t.id=Date.now();
 
+
 transactions.push(t);
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
+
 
 }
 
@@ -330,7 +426,9 @@ render();
 
 
 
+
 // DELETE
+
 
 function deleteItem(id){
 
@@ -346,7 +444,6 @@ db.collection("transactions")
 
 
 }
-
 else{
 
 deleteLocal(id);
@@ -358,11 +455,14 @@ deleteLocal(id);
 
 
 
+
+
 function deleteLocal(id){
 
 
 transactions =
 transactions.filter(item=>item.id!=id);
+
 
 
 localStorage.setItem(
@@ -371,16 +471,13 @@ JSON.stringify(transactions)
 );
 
 
+
 render();
 
 
 }
 
-
-
-
-
-
+  
 // LOAD FIREBASE
 
 function loadFromFirebase(){
@@ -435,9 +532,13 @@ render();
 
 })
 
+.catch(()=>{
 
-.catch(()=>render());
 
+render();
+
+
+});
 
 
 }
@@ -447,14 +548,14 @@ render();
 
 
 
-
-
-// DISPLAY + SORT DATE
+// DISPLAY TRANSACTIONS
+// LATEST DATE FIRST
 
 function render(){
 
 
 let list=document.getElementById("list");
+
 
 list.innerHTML="";
 
@@ -466,7 +567,9 @@ let expense=0;
 
 
 
-// OLDEST DATE FIRST
+
+// SORT BY DATE
+// NEWEST TRANSACTION AT TOP
 
 transactions.sort((a,b)=>{
 
@@ -476,10 +579,11 @@ let dateA=a.date.split("/").reverse().join("-");
 let dateB=b.date.split("/").reverse().join("-");
 
 
-return new Date(dateA)-new Date(dateB);
+return new Date(dateB)-new Date(dateA);
 
 
 });
+
 
 
 
@@ -514,6 +618,7 @@ ${t.desc}
 
 
 
+
 li.querySelector(".delete")
 .addEventListener(
 "click",
@@ -528,21 +633,27 @@ list.appendChild(li);
 
 
 
+
 if(t.type==="income"){
 
+
 income+=t.amount;
+
 
 }
 
 else{
 
+
 expense+=t.amount;
+
 
 }
 
 
 
 });
+
 
 
 
@@ -569,6 +680,8 @@ document.getElementById("balance")
 
 
 
+// START PROGRAM
+
 loadFromFirebase();
 
 
@@ -577,4 +690,5 @@ loadFromFirebase();
 
 
 </body>
+
 </html>
