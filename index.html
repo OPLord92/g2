@@ -137,8 +137,6 @@ transform:scale(1.3);
 
 }
 
-
-
 @keyframes bounce{
 
 0%{
@@ -163,9 +161,6 @@ transform:scale(1.3);
 
 }
 
-
-
-
 /* OPENING BALANCE */
 
 .opening{
@@ -175,23 +170,15 @@ border-left:5px solid orange;
 
 }
 
-
-
 </style>
-
 
 </head>
 
-
 <body>
-
 
 <div class="container">
 
-
 <h2>💰 Money Tracker</h2>
-
-
 
 <select id="name">
 
@@ -205,14 +192,10 @@ Kiki
 
 </select>
 
-
-
 <input 
 id="amount" 
 type="number" 
 placeholder="Amount">
-
-
 
 <select id="type">
 
@@ -220,32 +203,21 @@ placeholder="Amount">
 Savings (+)
 </option>
 
-
 <option value="expense">
 Expenses (-)
 </option>
 
-
 </select>
-
-
 
 <input 
 id="desc" 
 placeholder="Purpose">
 
-
-
 <button id="addBtn">
 Add
 </button>
 
-
-
-
-
 <div class="summary">
-
 
 <div class="box saving">
 
@@ -257,8 +229,6 @@ Add
 
 </div>
 
-
-
 <div class="box expenses">
 
 <h4>Expenses</h4>
@@ -268,8 +238,6 @@ Add
 </p>
 
 </div>
-
-
 
 <div class="box balance">
 
@@ -281,23 +249,13 @@ Add
 
 </div>
 
-
 </div>
-
-
 
 <ul id="list"></ul>
 
-
-
 </div>
 
-
-
-
 <script>
-
-
 
 const firebaseConfig = {
 
@@ -315,11 +273,7 @@ appId:"1:1794473489:web:6056cb5e3cef91bb60bbb0"
 
 };
 
-
-
 let db=null;
-
-
 
 try{
 
@@ -335,9 +289,6 @@ console.log("Firebase error");
 
 }
 
-
-
-
 let transactions =
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
@@ -347,7 +298,6 @@ JSON.parse(localStorage.getItem("moneyData")) || [];
 
 document.getElementById("addBtn")
 .addEventListener("click",function(){
-
 
 let name=document.getElementById("name").value;
 
@@ -370,8 +320,6 @@ return;
 
 }
 
-
-
 let t={
 
 name:name,
@@ -388,12 +336,7 @@ opening:false
 
 };
 
-
-
-
-
 if(db){
-
 
 db.collection("transactions")
 .add(t)
@@ -412,42 +355,21 @@ saveLocal(t);
 }
 else{
 
-
 saveLocal(t);
-
 
 }
 
-
-
 clearInputs();
-
-
 
 });
 
-
-
-
-
-
 function clearInputs(){
-
 
 document.getElementById("amount").value="";
 
 document.getElementById("desc").value="";
 
-
 }
-
-
-
-
-
-
-
-
 
 // =============================
 // LOCAL SAVE
@@ -461,27 +383,14 @@ t.id=Date.now();
 
 transactions.push(t);
 
-
-
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
-
-
 render();
 
-
 }
-
-
-
-
-
-
-
-
 
 // =============================
 // DELETE
@@ -489,11 +398,7 @@ render();
 
 function deleteItem(id){
 
-
-
 let item=transactions.find(t=>t.id===id);
-
-
 
 if(item && item.opening){
 
@@ -503,53 +408,30 @@ return;
 
 }
 
-
-
-
 if(db && typeof id==="string"){
-
-
 
 db.collection("transactions")
 .doc(id)
 .delete()
 .then(loadFromFirebase);
 
-
-
 }
 
 else{
 
-
 transactions=
 transactions.filter(t=>t.id!=id);
-
-
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
-
-
 render();
 
-
 }
 
-
-
 }
-
-
-
-
-
-
-
-
 
 // =============================
 // CALCULATE PREVIOUS MONTH BALANCE
@@ -557,27 +439,15 @@ render();
 
 function calculatePreviousBalance(){
 
-
-
 let now=new Date();
-
-
 
 let currentMonth=now.getMonth();
 
 let currentYear=now.getFullYear();
 
-
-
-
 let balance=0;
 
-
-
-
 transactions.forEach(t=>{
-
-
 
 if(t.opening){
 
@@ -585,23 +455,16 @@ return;
 
 }
 
-
-
 let parts=t.date.split("/");
 
 let dateMonth=parseInt(parts[1])-1;
 
 let dateYear=parseInt(parts[2]);
 
-
-
-
 if(
 dateYear < currentYear ||
 (dateYear===currentYear && dateMonth < currentMonth)
 ){
-
-
 
 if(t.type==="income"){
 
@@ -615,28 +478,13 @@ balance-=t.amount;
 
 }
 
-
-
 }
-
-
 
 });
 
-
-
 return balance;
 
-
 }
-
-
-
-
-
-
-
-
 
 // =============================
 // CREATE PERMANENT OPENING BALANCE
@@ -644,16 +492,11 @@ return balance;
 
 function createOpeningBalance(){
 
-
-
 let now=new Date();
-
 
 let month=now.getMonth()+1;
 
 let year=now.getFullYear();
-
-
 
 let openingDate=
 
@@ -662,24 +505,14 @@ String(month).padStart(2,"0")+
 "/"+
 year;
 
-
-
-
-
-
 // check existing opening balance
 
-
 let exists=transactions.some(t=>{
-
 
 return t.opening &&
 t.date===openingDate;
 
-
 });
-
-
 
 if(exists){
 
@@ -687,18 +520,7 @@ return;
 
 }
 
-
-
-
-
-
-
 let balance=calculatePreviousBalance();
-
-
-
-
-
 
 let opening={
 
@@ -718,18 +540,10 @@ opening:true
 
 };
 
-
-
-
-
-
-
 // SAVE PERMANENTLY TO FIREBASE
 
 
 if(db){
-
-
 
 db.collection("transactions")
 .add(opening)
@@ -741,35 +555,22 @@ loadFromFirebase();
 
 });
 
-
-
 }
 
 else{
 
-
-
 opening.id=Date.now();
 
-
 transactions.push(opening);
-
-
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
-
-
 render();
 
-
-
 }
-
-
 
 }
 
@@ -779,10 +580,7 @@ render();
 
 function loadFromFirebase(){
 
-
-
 if(!db){
-
 
 createOpeningBalance();
 
@@ -792,10 +590,6 @@ return;
 
 
 }
-
-
-
-
 
 db.collection("transactions")
 .get()
@@ -822,30 +616,16 @@ id:doc.id,
 
 });
 
-
-
-
-
-
 // create permanent opening balance if needed
 
 createOpeningBalance();
-
-
-
-
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
-
-
-
 render();
-
-
 
 })
 
@@ -860,14 +640,6 @@ render();
 
 
 }
-
-
-
-
-
-
-
-
 
 // =============================
 // RENDER DISPLAY
@@ -888,62 +660,30 @@ let income=0;
 
 let expense=0;
 
-
-
-
-
-
-
 // SORT
 // Latest date first
 // Opening balance stays above its own month
 
-
 transactions.sort((a,b)=>{
-
-
 
 let dateA=a.date.split("/").reverse().join("-");
 
 let dateB=b.date.split("/").reverse().join("-");
 
-
-
-
-
 return new Date(dateB)-new Date(dateA);
-
-
 
 });
 
 
-
-
-
-
-
-
 transactions.forEach(t=>{
 
-
-
 let li=document.createElement("li");
-
-
-
-
-
 
 if(t.opening){
 
 li.className="opening";
 
 }
-
-
-
-
 
 li.innerHTML=`
 
@@ -976,13 +716,6 @@ ${t.desc}
 `;
 
 
-
-
-
-
-
-
-
 // Opening balance cannot delete
 
 
@@ -997,31 +730,15 @@ li.querySelector(".delete")
 
 else{
 
-
-
 li.querySelector(".delete")
 .addEventListener(
 "click",
 ()=>deleteItem(t.id)
 );
 
-
-
 }
 
-
-
-
-
 list.appendChild(li);
-
-
-
-
-
-
-
-
 
 if(t.type==="income"){
 
@@ -1044,9 +761,6 @@ expense+=t.amount;
 document.getElementById("income")
 .innerText=income.toFixed(2);
 
-
-
-
 document.getElementById("expense")
 .innerText=expense.toFixed(2);
 
@@ -1059,10 +773,7 @@ document.getElementById("balance")
 // START
 // =============================
 
-
 loadFromFirebase();
-
-
 
 </script>
 
