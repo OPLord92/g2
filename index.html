@@ -1,335 +1,534 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Money Saving Tracker</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+
 <style>
+
 body{
-font-family:Arial;
-background:#f4f6f9;
-padding:20px;
+    font-family:Arial;
+    background:#f4f6f9;
+    padding:20px;
 }
+
 
 .container{
-max-width:650px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px #ccc;
 }
+
+
+h2{
+    text-align:center;
+}
+
 
 input,select,button{
-width:100%;
-padding:12px;
-margin:8px 0;
-box-sizing:border-box;
-font-size:16px;
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    font-size:16px;
 }
+
 
 button{
-background:#007bff;
-color:white;
-border:none;
-cursor:pointer;
+    background:#007bff;
+    color:white;
+    border:none;
+    cursor:pointer;
 }
+
+
+button:hover{
+    background:#0056b3;
+}
+
 
 .summary{
-display:flex;
-gap:10px;
-margin-top:20px;
+    display:flex;
+    gap:10px;
+    margin-top:20px;
 }
+
 
 .box{
-flex:1;
-padding:12px;
-text-align:center;
-color:white;
-border-radius:8px;
+    flex:1;
+    color:white;
+    padding:15px;
+    text-align:center;
+    border-radius:8px;
 }
 
-.saving{background:green;}
-.expenses{background:red;}
-.balance{background:black;}
+
+.saving{
+    background:green;
+}
+
+
+.expense{
+    background:red;
+}
+
+
+.balance{
+    background:#333;
+}
+
 
 ul{
-list-style:none;
-padding:0;
-margin-top:20px;
+    padding:0;
 }
+
 
 li{
-background:#eee;
-margin:8px 0;
-padding:12px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-border-radius:8px;
-font-size:14px;
+    list-style:none;
+    background:#eee;
+    margin:8px 0;
+    padding:12px;
+    border-radius:5px;
 }
 
-/* ===================== */
-/* 🗑️ DELETE ICON BOUNCE */
-/* ===================== */
 
 .delete{
-cursor:pointer;
-font-size:22px;
-display:inline-block;
-transition:transform 0.2s ease;
+    float:right;
+    color:red;
+    cursor:pointer;
 }
 
-/* hover animation */
-.delete:hover{
-animation:bounce 0.5s ease;
-transform:scale(1.3);
-}
 
-/* bounce keyframes */
-@keyframes bounce{
-0%   {transform:scale(1);}
-30%  {transform:scale(1.4);}
-50%  {transform:scale(0.9);}
-70%  {transform:scale(1.2);}
-100% {transform:scale(1.3);}
+.date{
+    color:#555;
+    font-size:13px;
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-<h2>💰 Money Tracker</h2>
 
-<select id="name">
-<option value="Gary">Gary</option>
-<option value="Kiki">Kiki</option>
-</select>
+<h2>💰 Money Saving Tracker</h2>
 
-<input id="amount" type="number" placeholder="Amount">
+
+<input id="name" placeholder="Personal Name">
+
+
+<input id="amount" 
+type="number" 
+placeholder="Amount">
+
 
 <select id="type">
-<option value="income">Savings (+)</option>
-<option value="expense">Expenses (-)</option>
+
+<option value="income">
+Add Savings (+)
+</option>
+
+<option value="expense">
+Add Expense (-)
+</option>
+
 </select>
+
 
 <input id="desc" placeholder="Purpose">
 
-<button id="addBtn">Add</button>
+
+<input id="date" type="date">
+
+
+<button id="addBtn">
+Add Transaction
+</button>
+
+
 
 <div class="summary">
 
+
 <div class="box saving">
-<h4>Savings</h4>
-<p id="income">0.00</p>
+
+<h4>Total Savings</h4>
+
+<p id="income">
+0
+</p>
+
 </div>
 
-<div class="box expenses">
-<h4>Expenses</h4>
-<p id="expense">0.00</p>
+
+
+<div class="box expense">
+
+<h4>Total Expense</h4>
+
+<p id="expense">
+0
+</p>
+
 </div>
+
+
 
 <div class="box balance">
+
 <h4>Balance</h4>
-<p id="balance">0.00</p>
-</div>
+
+<p id="balance">
+0
+</p>
 
 </div>
+
+
+</div>
+
+
+<h3>
+Transaction History
+</h3>
+
 
 <ul id="list"></ul>
 
+
 </div>
+
+
+
+
 
 <script>
 
-const firebaseConfig = {
-apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
-authDomain: "oplord-savings.firebaseapp.com",
-projectId: "oplord-savings",
-storageBucket: "oplord-savings.firebasestorage.app",
-messagingSenderId: "1794473489",
-appId: "1:1794473489:web:6056cb5e3cef91bb60bbb0"
+
+// ===============================
+// FIREBASE CONFIG
+// REPLACE WITH YOUR OWN
+// ===============================
+
+
+var firebaseConfig = {
+
+apiKey:"YOUR_API_KEY",
+
+authDomain:"YOUR_PROJECT.firebaseapp.com",
+
+projectId:"YOUR_PROJECT_ID"
+
 };
 
-let db=null;
 
-try{
+
 firebase.initializeApp(firebaseConfig);
-db=firebase.firestore();
-}catch(e){
-console.log("Firebase fallback local storage");
-}
 
 
-let transactions=
-JSON.parse(localStorage.getItem("moneyData")) || [];
+var db=firebase.firestore();
 
 
-// ADD
-document.getElementById("addBtn").addEventListener("click",function(){
 
-let name=document.getElementById("name").value;
-let amount=document.getElementById("amount").value;
-let type=document.getElementById("type").value;
-let desc=document.getElementById("desc").value.trim();
-
-let date=new Date().toLocaleDateString("en-GB");
-
-if(!amount || !desc){
-alert("Fill all fields");
-return;
-}
-
-let t={
-name:name,
-date:date,
-amount:parseFloat(amount),
-type:type,
-desc:desc
-};
-
-if(db){
-db.collection("transactions").add(t)
-.then(()=>loadFromFirebase())
-.catch(()=>saveLocal(t));
-}else{
-saveLocal(t);
-}
-
-clearInputs();
-});
-
-function clearInputs(){
-document.getElementById("amount").value="";
-document.getElementById("desc").value="";
-}
+let transactions=[];
 
 
-// LOCAL SAVE
-function saveLocal(t){
 
-t.id=Date.now();
-
-transactions.push(t);
-
-localStorage.setItem("moneyData",JSON.stringify(transactions));
-
-render();
-
-}
+// ===============================
+// LOAD DATA
+// ===============================
 
 
-// DELETE
-function deleteItem(id){
+function loadData(){
 
-if(db && typeof id==="string"){
 
 db.collection("transactions")
-.doc(id)
-.delete()
-.then(loadFromFirebase)
-.catch(()=>deleteLocal(id));
 
-}else{
-deleteLocal(id);
-}
+.onSnapshot(snapshot=>{
 
-}
-
-function deleteLocal(id){
-
-transactions=
-transactions.filter(item=>item.id!=id);
-
-localStorage.setItem("moneyData",JSON.stringify(transactions));
-
-render();
-
-}
-
-
-// LOAD FIREBASE
-function loadFromFirebase(){
-
-if(!db){
-render();
-return;
-}
-
-db.collection("transactions")
-.get()
-.then(snapshot=>{
 
 transactions=[];
 
+
 snapshot.forEach(doc=>{
 
+
+let data=doc.data();
+
+
 transactions.push({
+
 id:doc.id,
-...doc.data()
-});
+
+...data
 
 });
 
-localStorage.setItem("moneyData",JSON.stringify(transactions));
+
+});
+
+
+
+// SORT OLD DATE TO NEW DATE
+
+transactions.sort(function(a,b){
+
+
+return new Date(a.date) - new Date(b.date);
+
+
+});
+
 
 render();
 
-})
-.catch(()=>render());
-
-}
-
-
-// RENDER
-function render(){
-
-let list=document.getElementById("list");
-list.innerHTML="";
-
-let income=0;
-let expense=0;
-
-transactions.forEach(t=>{
-
-let li=document.createElement("li");
-
-li.innerHTML=`
-<span>
-📅 ${t.date} | <b>${t.name}</b> | ${t.desc}
-(${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
-</span>
-
-<span class="delete">🗑️</span>
-`;
-
-li.querySelector(".delete")
-.addEventListener("click",()=>deleteItem(t.id));
-
-list.appendChild(li);
-
-if(t.type==="income") income+=t.amount;
-else expense+=t.amount;
 
 });
 
-document.getElementById("income").innerText=income.toFixed(2);
-document.getElementById("expense").innerText=expense.toFixed(2);
-document.getElementById("balance").innerText=(income-expense).toFixed(2);
 
 }
 
-loadFromFirebase();
+
+
+
+
+// ===============================
+// ADD TRANSACTION
+// ===============================
+
+
+document
+.getElementById("addBtn")
+.addEventListener("click",function(){
+
+
+
+let name=
+document.getElementById("name").value;
+
+
+
+let amount=
+document.getElementById("amount").value;
+
+
+
+let type=
+document.getElementById("type").value;
+
+
+
+let desc=
+document.getElementById("desc").value;
+
+
+
+let date=
+document.getElementById("date").value;
+
+
+
+if(
+!name ||
+!amount ||
+!desc ||
+!date
+){
+
+alert("Please fill all fields");
+
+return;
+
+}
+
+
+
+db.collection("transactions")
+.add({
+
+
+name:name,
+
+
+amount:Number(amount),
+
+
+type:type,
+
+
+desc:desc,
+
+
+date:date
+
+
+});
+
+
+
+document.getElementById("amount").value="";
+
+document.getElementById("desc").value="";
+
+
+});
+
+
+
+
+
+// ===============================
+// DELETE
+// ===============================
+
+
+function deleteTransaction(id){
+
+
+db.collection("transactions")
+.doc(id)
+.delete();
+
+
+}
+
+
+
+
+
+// ===============================
+// DISPLAY
+// ===============================
+
+
+function render(){
+
+
+let list=
+document.getElementById("list");
+
+
+list.innerHTML="";
+
+
+
+let income=0;
+
+let expense=0;
+
+
+
+transactions.forEach(t=>{
+
+
+let li=document.createElement("li");
+
+
+
+li.innerHTML=`
+
+<div class="date">
+
+📅 ${t.date}
+
+</div>
+
+
+<b>${t.name}</b>
+
+<br>
+
+
+${t.desc}
+
+
+<br>
+
+
+${t.type=="income" ? "+" : "-"}
+
+RM ${t.amount}
+
+
+<span class="delete">
+
+❌
+
+</span>
+
+`;
+
+
+
+li.querySelector(".delete")
+.onclick=function(){
+
+deleteTransaction(t.id);
+
+};
+
+
+
+list.appendChild(li);
+
+
+
+if(t.type=="income"){
+
+income+=t.amount;
+
+}
+
+else{
+
+expense+=t.amount;
+
+}
+
+
+
+});
+
+
+
+document.getElementById("income")
+.innerHTML="RM "+income.toFixed(2);
+
+
+
+document.getElementById("expense")
+.innerHTML="RM "+expense.toFixed(2);
+
+
+
+document.getElementById("balance")
+.innerHTML="RM "+(income-expense).toFixed(2);
+
+
+
+}
+
+
+
+
+loadData();
+
+
 
 </script>
+
 
 </body>
 </html>
