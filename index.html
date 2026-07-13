@@ -8,7 +8,6 @@
 
 <title>Money Saving Tracker</title>
 
-
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -53,6 +52,7 @@ cursor:pointer;
 }
 
 
+
 .summary{
 
 display:flex;
@@ -60,6 +60,7 @@ gap:10px;
 margin-top:20px;
 
 }
+
 
 
 .box{
@@ -98,6 +99,7 @@ margin-top:20px;
 }
 
 
+
 li{
 
 background:#eee;
@@ -116,8 +118,7 @@ font-size:14px;
 
 
 
-
-/* DELETE BUTTON */
+/* DELETE ICON */
 
 .delete{
 
@@ -164,7 +165,8 @@ transform:scale(1.3);
 
 
 
-/* OPENING BALANCE STYLE */
+
+/* OPENING BALANCE */
 
 .opening{
 
@@ -197,17 +199,18 @@ border-left:5px solid orange;
 Gary
 </option>
 
-
 <option value="Kiki">
 Kiki
 </option>
-
 
 </select>
 
 
 
-<input id="amount" type="number" placeholder="Amount">
+<input 
+id="amount" 
+type="number" 
+placeholder="Amount">
 
 
 
@@ -227,7 +230,9 @@ Expenses (-)
 
 
 
-<input id="desc" placeholder="Purpose">
+<input 
+id="desc" 
+placeholder="Purpose">
 
 
 
@@ -254,7 +259,6 @@ Add
 
 
 
-
 <div class="box expenses">
 
 <h4>Expenses</h4>
@@ -264,7 +268,6 @@ Add
 </p>
 
 </div>
-
 
 
 
@@ -283,7 +286,6 @@ Add
 
 
 
-
 <ul id="list"></ul>
 
 
@@ -293,8 +295,8 @@ Add
 
 
 
-
 <script>
+
 
 
 const firebaseConfig = {
@@ -329,17 +331,19 @@ db=firebase.firestore();
 
 catch(e){
 
-console.log("Firebase unavailable");
+console.log("Firebase error");
 
 }
+
 
 
 
 let transactions =
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
-
+// =============================
 // ADD TRANSACTION
+// =============================
 
 document.getElementById("addBtn")
 .addEventListener("click",function(){
@@ -352,7 +356,6 @@ let amount=document.getElementById("amount").value;
 let type=document.getElementById("type").value;
 
 let desc=document.getElementById("desc").value.trim();
-
 
 
 let date=new Date().toLocaleDateString("en-GB");
@@ -379,9 +382,12 @@ amount:parseFloat(amount),
 
 type:type,
 
-desc:desc
+desc:desc,
+
+opening:false
 
 };
+
 
 
 
@@ -391,8 +397,16 @@ if(db){
 
 db.collection("transactions")
 .add(t)
-.then(loadFromFirebase)
-.catch(()=>saveLocal(t));
+.then(()=>{
+
+loadFromFirebase();
+
+})
+.catch(()=>{
+
+saveLocal(t);
+
+});
 
 
 }
@@ -434,7 +448,10 @@ document.getElementById("desc").value="";
 
 
 
-// SAVE LOCAL
+
+// =============================
+// LOCAL SAVE
+// =============================
 
 function saveLocal(t){
 
@@ -466,9 +483,26 @@ render();
 
 
 
-// DELETE TRANSACTION
+// =============================
+// DELETE
+// =============================
 
 function deleteItem(id){
+
+
+
+let item=transactions.find(t=>t.id===id);
+
+
+
+if(item && item.opening){
+
+alert("Opening Balance cannot be deleted");
+
+return;
+
+}
+
 
 
 
@@ -479,8 +513,7 @@ if(db && typeof id==="string"){
 db.collection("transactions")
 .doc(id)
 .delete()
-.then(loadFromFirebase)
-.catch(()=>deleteLocal(id));
+.then(loadFromFirebase);
 
 
 
@@ -489,26 +522,8 @@ db.collection("transactions")
 else{
 
 
-deleteLocal(id);
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-function deleteLocal(id){
-
-
-
-transactions =
-transactions.filter(item=>item.id!=id);
+transactions=
+transactions.filter(t=>t.id!=id);
 
 
 
@@ -522,6 +537,9 @@ JSON.stringify(transactions)
 render();
 
 
+}
+
+
 
 }
 
@@ -533,10 +551,11 @@ render();
 
 
 
-// CREATE MONTHLY OPENING BALANCE
+// =============================
+// CALCULATE PREVIOUS MONTH BALANCE
+// =============================
 
-
-function createOpeningBalance(){
+function calculatePreviousBalance(){
 
 
 
@@ -551,14 +570,16 @@ let currentYear=now.getFullYear();
 
 
 
-let openingKey=
-"opening_"+currentYear+"_"+currentMonth;
+let balance=0;
 
 
 
-// already created
 
-if(localStorage.getItem(openingKey)){
+transactions.forEach(t=>{
+
+
+
+if(t.opening){
 
 return;
 
@@ -566,23 +587,23 @@ return;
 
 
 
+let parts=t.date.split("/");
 
-let balance=0;
+let dateMonth=parseInt(parts[1])-1;
 
-
-
-// calculate current balance
-
-transactions.forEach(t=>{
+let dateYear=parseInt(parts[2]);
 
 
-if(t.opening){
 
-balance+=t.amount;
 
-}
+if(
+dateYear < currentYear ||
+(dateYear===currentYear && dateMonth < currentMonth)
+){
 
-else if(t.type==="income"){
+
+
+if(t.type==="income"){
 
 balance+=t.amount;
 
@@ -595,8 +616,84 @@ balance-=t.amount;
 }
 
 
+
+}
+
+
+
 });
 
+
+
+return balance;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =============================
+// CREATE PERMANENT OPENING BALANCE
+// =============================
+
+function createOpeningBalance(){
+
+
+
+let now=new Date();
+
+
+let month=now.getMonth()+1;
+
+let year=now.getFullYear();
+
+
+
+let openingDate=
+
+"01/"+
+String(month).padStart(2,"0")+
+"/"+
+year;
+
+
+
+
+
+
+// check existing opening balance
+
+
+let exists=transactions.some(t=>{
+
+
+return t.opening &&
+t.date===openingDate;
+
+
+});
+
+
+
+if(exists){
+
+return;
+
+}
+
+
+
+
+
+
+
+let balance=calculatePreviousBalance();
 
 
 
@@ -608,28 +705,15 @@ let opening={
 
 name:"System",
 
-
-date:
-"01/"+
-String(currentMonth+1).padStart(2,"0")+
-"/"+
-currentYear,
-
+date:openingDate,
 
 amount:balance,
 
-
 type:"income",
-
 
 desc:"Opening Balance",
 
-
-id:openingKey,
-
-
 opening:true
-
 
 
 };
@@ -639,16 +723,36 @@ opening:true
 
 
 
+
+// SAVE PERMANENTLY TO FIREBASE
+
+
+if(db){
+
+
+
+db.collection("transactions")
+.add(opening)
+.then(()=>{
+
+console.log("Opening Balance Created");
+
+loadFromFirebase();
+
+});
+
+
+
+}
+
+else{
+
+
+
+opening.id=Date.now();
+
+
 transactions.push(opening);
-
-
-
-
-
-localStorage.setItem(
-openingKey,
-JSON.stringify(opening)
-);
 
 
 
@@ -657,15 +761,28 @@ localStorage.setItem(
 JSON.stringify(transactions)
 );
 
+
+
+render();
+
+
+
 }
 
 
+
+}
+
+// =============================
 // LOAD FIREBASE
+// =============================
 
 function loadFromFirebase(){
 
 
+
 if(!db){
+
 
 createOpeningBalance();
 
@@ -673,7 +790,9 @@ render();
 
 return;
 
+
 }
+
 
 
 
@@ -682,6 +801,7 @@ db.collection("transactions")
 .get()
 
 .then(snapshot=>{
+
 
 
 transactions=[];
@@ -705,9 +825,13 @@ id:doc.id,
 
 
 
-// create opening balance
+
+
+// create permanent opening balance if needed
 
 createOpeningBalance();
+
+
 
 
 
@@ -715,6 +839,7 @@ localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
+
 
 
 
@@ -726,8 +851,6 @@ render();
 
 .catch(()=>{
 
-
-createOpeningBalance();
 
 render();
 
@@ -746,9 +869,12 @@ render();
 
 
 
-// RENDER LIST
+// =============================
+// RENDER DISPLAY
+// =============================
 
 function render(){
+
 
 
 let list=document.getElementById("list");
@@ -766,16 +892,14 @@ let expense=0;
 
 
 
-// LATEST DATE FIRST
+
+
+// SORT
+// Latest date first
+// Opening balance stays above its own month
+
 
 transactions.sort((a,b)=>{
-
-
-// opening balance always top
-
-if(a.opening) return -1;
-
-if(b.opening) return 1;
 
 
 
@@ -785,11 +909,14 @@ let dateB=b.date.split("/").reverse().join("-");
 
 
 
+
+
 return new Date(dateB)-new Date(dateA);
 
 
 
 });
+
 
 
 
@@ -806,7 +933,7 @@ let li=document.createElement("li");
 
 
 
-// opening balance style
+
 
 if(t.opening){
 
@@ -817,10 +944,10 @@ li.className="opening";
 
 
 
+
 li.innerHTML=`
 
 <span>
-
 
 ${t.opening ? "📌" : "📅"}
 
@@ -836,9 +963,8 @@ ${t.desc}
 
 (${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
 
-
-
 </span>
+
 
 
 <span class="delete">
@@ -846,7 +972,6 @@ ${t.desc}
 🗑️
 
 </span>
-
 
 `;
 
@@ -856,7 +981,10 @@ ${t.desc}
 
 
 
-// hide delete for opening balance
+
+
+// Opening balance cannot delete
+
 
 if(t.opening){
 
@@ -868,6 +996,7 @@ li.querySelector(".delete")
 }
 
 else{
+
 
 
 li.querySelector(".delete")
@@ -884,9 +1013,8 @@ li.querySelector(".delete")
 
 
 
-
-
 list.appendChild(li);
+
 
 
 
@@ -918,20 +1046,27 @@ document.getElementById("income")
 
 
 
+
 document.getElementById("expense")
 .innerText=expense.toFixed(2);
-
-
 
 document.getElementById("balance")
 .innerText=(income-expense).toFixed(2);
 
 }
 
-// START APPLICATION
+// =============================
+// START
+// =============================
+
 
 loadFromFirebase();
 
+
+
 </script>
+
+
 </body>
+
 </html>
