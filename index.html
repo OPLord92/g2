@@ -9,7 +9,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <style>
-
 body{
 font-family:Arial;
 background:#f4f6f9;
@@ -40,11 +39,6 @@ border:none;
 cursor:pointer;
 }
 
-button:hover{
-background:#0056b3;
-}
-
-
 .summary{
 display:flex;
 gap:10px;
@@ -59,25 +53,15 @@ color:white;
 border-radius:8px;
 }
 
-.saving{
-background:green;
-}
-
-.expenses{
-background:red;
-}
-
-.balance{
-background:black;
-}
-
+.saving{background:green;}
+.expenses{background:red;}
+.balance{background:black;}
 
 ul{
 list-style:none;
 padding:0;
 margin-top:20px;
 }
-
 
 li{
 background:#eee;
@@ -90,6 +74,9 @@ border-radius:8px;
 font-size:14px;
 }
 
+/* ===================== */
+/* 🗑️ DELETE ICON BOUNCE */
+/* ===================== */
 
 .delete{
 cursor:pointer;
@@ -98,654 +85,251 @@ display:inline-block;
 transition:transform 0.2s ease;
 }
 
-
+/* hover animation */
 .delete:hover{
 animation:bounce 0.5s ease;
 transform:scale(1.3);
 }
 
-
+/* bounce keyframes */
 @keyframes bounce{
-
-0%{
-transform:scale(1);
+0%   {transform:scale(1);}
+30%  {transform:scale(1.4);}
+50%  {transform:scale(0.9);}
+70%  {transform:scale(1.2);}
+100% {transform:scale(1.3);}
 }
-
-30%{
-transform:scale(1.4);
-}
-
-50%{
-transform:scale(0.9);
-}
-
-70%{
-transform:scale(1.2);
-}
-
-100%{
-transform:scale(1.3);
-}
-
-}
-
 
 </style>
-
 </head>
-
 
 <body>
 
-
 <div class="container">
-
 
 <h2>💰 Money Tracker</h2>
 
-
 <select id="name">
-
-<option value="Gary">
-Gary
-</option>
-
-<option value="Kiki">
-Kiki
-</option>
-
+<option value="Gary">Gary</option>
+<option value="Kiki">Kiki</option>
 </select>
 
-
-
-<input 
-id="amount" 
-type="number" 
-placeholder="Amount">
-
-
+<input id="amount" type="number" placeholder="Amount">
 
 <select id="type">
-
-<option value="income">
-Savings (+)
-</option>
-
-<option value="expense">
-Expenses (-)
-</option>
-
+<option value="income">Savings (+)</option>
+<option value="expense">Expenses (-)</option>
 </select>
 
+<input id="desc" placeholder="Purpose">
 
-
-<input 
-id="desc" 
-placeholder="Purpose">
-
-
-
-<button id="addBtn">
-Add
-</button>
-
-
-
+<button id="addBtn">Add</button>
 
 <div class="summary">
 
-
 <div class="box saving">
-
 <h4>Savings</h4>
-
-<p id="income">
-0.00
-</p>
-
+<p id="income">0.00</p>
 </div>
-
 
 <div class="box expenses">
-
 <h4>Expenses</h4>
-
-<p id="expense">
-0.00
-</p>
-
+<p id="expense">0.00</p>
 </div>
-
-
 
 <div class="box balance">
-
 <h4>Balance</h4>
-
-<p id="balance">
-0.00
-</p>
-
+<p id="balance">0.00</p>
 </div>
 
-
 </div>
-
 
 <ul id="list"></ul>
 
-
 </div>
-
-
-
 
 <script>
 
-
 const firebaseConfig = {
-
 apiKey: "AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
-
 authDomain: "oplord-savings.firebaseapp.com",
-
 projectId: "oplord-savings",
-
 storageBucket: "oplord-savings.firebasestorage.app",
-
 messagingSenderId: "1794473489",
-
 appId: "1:1794473489:web:6056cb5e3cef91bb60bbb0"
-
 };
-
-
 
 let db=null;
 
-
 try{
-
 firebase.initializeApp(firebaseConfig);
-
 db=firebase.firestore();
-
-
 }catch(e){
-
-console.log("Firebase error");
-
+console.log("Firebase fallback local storage");
 }
 
 
-
-
-let transactions =
+let transactions=
 JSON.parse(localStorage.getItem("moneyData")) || [];
 
 
+// ADD
+document.getElementById("addBtn").addEventListener("click",function(){
 
+let name=document.getElementById("name").value;
+let amount=document.getElementById("amount").value;
+let type=document.getElementById("type").value;
+let desc=document.getElementById("desc").value.trim();
 
-
-// =====================
-// ADD TRANSACTION
-// =====================
-
-
-document
-.getElementById("addBtn")
-.addEventListener("click",function(){
-
-
-
-let name =
-document.getElementById("name").value;
-
-
-let amount =
-document.getElementById("amount").value;
-
-
-let type =
-document.getElementById("type").value;
-
-
-let desc =
-document.getElementById("desc").value.trim();
-
-
-
-// CREATE SORTABLE DATE
-
-let now=new Date();
-
-
-let date =
-now.getFullYear()+"-"+
-String(now.getMonth()+1).padStart(2,"0")+"-"+
-String(now.getDate()).padStart(2,"0");
-
-
-
+let date=new Date().toLocaleDateString("en-GB");
 
 if(!amount || !desc){
-
 alert("Fill all fields");
-
 return;
-
 }
-
-
 
 let t={
-
 name:name,
-
 date:date,
-
-amount:Number(amount),
-
+amount:parseFloat(amount),
 type:type,
-
 desc:desc
-
 };
 
-
-
-
 if(db){
-
-
-db.collection("transactions")
-.add(t)
-
-.then(()=>{
-
-loadFromFirebase();
-
-})
-
-
-.catch(()=>{
-
-saveLocal(t);
-
-});
-
-
+db.collection("transactions").add(t)
+.then(()=>loadFromFirebase())
+.catch(()=>saveLocal(t));
 }else{
-
-
 saveLocal(t);
-
-
 }
-
-
 
 clearInputs();
-
-
-
 });
 
-
-
-
-
-
 function clearInputs(){
-
 document.getElementById("amount").value="";
-
 document.getElementById("desc").value="";
-
 }
 
 
-
-
-
-
-// =====================
-// SAVE LOCAL
-// =====================
-
-
+// LOCAL SAVE
 function saveLocal(t){
-
 
 t.id=Date.now();
 
-
 transactions.push(t);
 
-
-sortData();
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
+localStorage.setItem("moneyData",JSON.stringify(transactions));
 
 render();
-
 
 }
 
 
-
-
-
-
-// =====================
 // DELETE
-// =====================
-
-
 function deleteItem(id){
 
-
 if(db && typeof id==="string"){
-
 
 db.collection("transactions")
 .doc(id)
 .delete()
+.then(loadFromFirebase)
+.catch(()=>deleteLocal(id));
 
-.then(()=>{
-
-loadFromFirebase();
-
-});
-
+}else{
+deleteLocal(id);
+}
 
 }
 
-else{
+function deleteLocal(id){
 
+transactions=
+transactions.filter(item=>item.id!=id);
 
-transactions =
-transactions.filter(
-item=>item.id!=id
-);
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
+localStorage.setItem("moneyData",JSON.stringify(transactions));
 
 render();
 
-
 }
 
 
-}
-
-
-
-
-
-
-
-// =====================
 // LOAD FIREBASE
-// =====================
-
-
 function loadFromFirebase(){
 
-
-
 if(!db){
-
 render();
-
 return;
-
 }
-
-
 
 db.collection("transactions")
 .get()
-
 .then(snapshot=>{
-
 
 transactions=[];
 
-
-
 snapshot.forEach(doc=>{
 
-
 transactions.push({
-
 id:doc.id,
-
 ...doc.data()
+});
 
 });
 
-
-});
-
-
-
-sortData();
-
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
+localStorage.setItem("moneyData",JSON.stringify(transactions));
 
 render();
-
-
 
 })
-
-
-.catch(()=>{
-
-
-render();
-
-
-});
-
+.catch(()=>render());
 
 }
 
 
-
-
-
-
-
-// =====================
-// SORT DATE
-// =====================
-
-
-function sortData(){
-
-
-transactions.sort((a,b)=>{
-
-
-return new Date(a.date)-new Date(b.date);
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-// =====================
-// FORMAT DATE
-// =====================
-
-
-function formatDate(date){
-
-
-let d=new Date(date);
-
-
-return d.toLocaleDateString("en-GB");
-
-
-}
-
-
-
-
-
-
-
-// =====================
-// DISPLAY
-// =====================
-
-
+// RENDER
 function render(){
 
-
-let list=
-document.getElementById("list");
-
-
+let list=document.getElementById("list");
 list.innerHTML="";
 
-
-
 let income=0;
-
 let expense=0;
-
-
-
 
 transactions.forEach(t=>{
 
-
 let li=document.createElement("li");
 
-
-
 li.innerHTML=`
-
 <span>
-
-📅 ${formatDate(t.date)}
-
-|
-
-<b>${t.name}</b>
-
-|
-
-${t.desc}
-
-<br>
-
-${t.type==="income" ? "+" : "-"}
-
-RM${t.amount.toFixed(2)}
-
+📅 ${t.date} | <b>${t.name}</b> | ${t.desc}
+(${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
 </span>
 
-
-<span class="delete">
-🗑️
-</span>
-
+<span class="delete">🗑️</span>
 `;
 
-
-
-
 li.querySelector(".delete")
-.addEventListener("click",()=>{
-
-
-deleteItem(t.id);
-
-
-});
-
-
+.addEventListener("click",()=>deleteItem(t.id));
 
 list.appendChild(li);
 
-
-
-
-if(t.type==="income"){
-
-
-income+=t.amount;
-
-
-}
-
-else{
-
-
-expense+=t.amount;
-
-
-}
-
+if(t.type==="income") income+=t.amount;
+else expense+=t.amount;
 
 });
 
-
-
-
-document.getElementById("income")
-.innerText=income.toFixed(2);
-
-
-document.getElementById("expense")
-.innerText=expense.toFixed(2);
-
-
-document.getElementById("balance")
-.innerText=(income-expense).toFixed(2);
-
-
+document.getElementById("income").innerText=income.toFixed(2);
+document.getElementById("expense").innerText=expense.toFixed(2);
+document.getElementById("balance").innerText=(income-expense).toFixed(2);
 
 }
 
-
-
-
 loadFromFirebase();
 
-
-
 </script>
-
 
 </body>
 </html>
