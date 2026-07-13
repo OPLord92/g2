@@ -52,6 +52,14 @@ cursor:pointer;
 }
 
 
+#recalculateBtn{
+
+background:#28a745;
+
+}
+
+
+
 
 .summary{
 
@@ -60,7 +68,6 @@ gap:10px;
 margin-top:20px;
 
 }
-
 
 
 .box{
@@ -90,6 +97,7 @@ background:black;
 
 
 
+
 ul{
 
 list-style:none;
@@ -97,6 +105,7 @@ padding:0;
 margin-top:20px;
 
 }
+
 
 
 
@@ -118,16 +127,17 @@ font-size:14px;
 
 
 
-/* DELETE ICON */
 
 .delete{
 
 cursor:pointer;
 font-size:22px;
 display:inline-block;
+
 transition:transform .2s;
 
 }
+
 
 
 .delete:hover{
@@ -137,31 +147,41 @@ transform:scale(1.3);
 
 }
 
+
+
 @keyframes bounce{
+
 
 0%{
 transform:scale(1);
 }
 
+
 30%{
 transform:scale(1.4);
 }
+
 
 50%{
 transform:scale(.9);
 }
 
+
 70%{
 transform:scale(1.2);
 }
+
 
 100%{
 transform:scale(1.3);
 }
 
+
 }
 
-/* OPENING BALANCE */
+
+
+
 
 .opening{
 
@@ -170,15 +190,24 @@ border-left:5px solid orange;
 
 }
 
+
+
 </style>
 
 </head>
 
+
+
 <body>
+
+
 
 <div class="container">
 
+
 <h2>💰 Money Tracker</h2>
+
+
 
 <select id="name">
 
@@ -186,38 +215,74 @@ border-left:5px solid orange;
 Gary
 </option>
 
+
 <option value="Kiki">
 Kiki
 </option>
 
+
 </select>
 
+
+
+
+
 <input 
-id="amount" 
-type="number" 
+id="amount"
+type="number"
 placeholder="Amount">
 
+
+
+
+
+
 <select id="type">
+
 
 <option value="income">
 Savings (+)
 </option>
 
+
 <option value="expense">
 Expenses (-)
 </option>
 
+
 </select>
 
-<input 
-id="desc" 
+
+
+
+
+<input
+id="desc"
 placeholder="Purpose">
+
+
+
+
 
 <button id="addBtn">
 Add
 </button>
 
+
+
+
+<button id="recalculateBtn">
+🔄 Recalculate Opening Balance
+</button>
+
+
+
+
+
+
 <div class="summary">
+
+
 
 <div class="box saving">
 
@@ -229,6 +294,9 @@ Add
 
 </div>
 
+
+
+
 <div class="box expenses">
 
 <h4>Expenses</h4>
@@ -238,6 +306,10 @@ Add
 </p>
 
 </div>
+
+
+
+
 
 <div class="box balance">
 
@@ -249,15 +321,32 @@ Add
 
 </div>
 
+
+
 </div>
+
+
+
+
 
 <ul id="list"></ul>
 
+
+
+
 </div>
+
+
+
+
+
+
 
 <script>
 
+
 const firebaseConfig = {
+
 
 apiKey:"AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
 
@@ -271,21 +360,34 @@ messagingSenderId:"1794473489",
 
 appId:"1:1794473489:web:6056cb5e3cef91bb60bbb0"
 
+
 };
+
+
+
 
 let db=null;
 
+
+
+
 try{
+
 
 firebase.initializeApp(firebaseConfig);
 
+
 db=firebase.firestore();
+
+
 
 }
 
 catch(e){
 
-console.log("Firebase error");
+
+console.log("Firebase unavailable");
+
 
 }
 
@@ -298,6 +400,7 @@ JSON.parse(localStorage.getItem("moneyData")) || [];
 
 document.getElementById("addBtn")
 .addEventListener("click",function(){
+
 
 let name=document.getElementById("name").value;
 
@@ -320,6 +423,8 @@ return;
 
 }
 
+
+
 let t={
 
 name:name,
@@ -336,43 +441,61 @@ opening:false
 
 };
 
+
+
+
+
 if(db){
+
 
 db.collection("transactions")
 .add(t)
-.then(()=>{
-
-loadFromFirebase();
-
-})
-.catch(()=>{
-
-saveLocal(t);
-
-});
+.then(loadFromFirebase)
+.catch(()=>saveLocal(t));
 
 
 }
+
 else{
 
+
 saveLocal(t);
 
+
 }
+
+
 
 clearInputs();
 
+
+
 });
 
+
+
+
+
+
 function clearInputs(){
+
 
 document.getElementById("amount").value="";
 
 document.getElementById("desc").value="";
 
+
 }
 
+
+
+
+
+
+
+
 // =============================
-// LOCAL SAVE
+// SAVE LOCAL
 // =============================
 
 function saveLocal(t){
@@ -383,55 +506,100 @@ t.id=Date.now();
 
 transactions.push(t);
 
+
+
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
+
 
 }
 
+
+
+
+
+
+
+
+
 // =============================
-// DELETE
+// DELETE TRANSACTION
 // =============================
 
 function deleteItem(id){
 
+
+
 let item=transactions.find(t=>t.id===id);
+
+
 
 if(item && item.opening){
 
+
 alert("Opening Balance cannot be deleted");
+
 
 return;
 
+
 }
 
+
+
+
+
+
 if(db && typeof id==="string"){
+
+
 
 db.collection("transactions")
 .doc(id)
 .delete()
 .then(loadFromFirebase);
 
+
+
 }
 
 else{
 
+
 transactions=
 transactions.filter(t=>t.id!=id);
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
 
-}
 
 }
+
+
+
+}
+
+
+
+
+
+
+
+
 
 // =============================
 // CALCULATE PREVIOUS MONTH BALANCE
@@ -439,15 +607,26 @@ render();
 
 function calculatePreviousBalance(){
 
+
+
 let now=new Date();
+
 
 let currentMonth=now.getMonth();
 
 let currentYear=now.getFullYear();
 
+
+
 let balance=0;
 
+
+
+
+
 transactions.forEach(t=>{
+
+
 
 if(t.opening){
 
@@ -455,36 +634,73 @@ return;
 
 }
 
+
+
+
 let parts=t.date.split("/");
 
-let dateMonth=parseInt(parts[1])-1;
 
-let dateYear=parseInt(parts[2]);
+let month=parseInt(parts[1])-1;
+
+let year=parseInt(parts[2]);
+
+
+
+
+
+// only previous months
 
 if(
-dateYear < currentYear ||
-(dateYear===currentYear && dateMonth < currentMonth)
+
+year < currentYear ||
+
+(year===currentYear && month < currentMonth)
+
 ){
+
+
 
 if(t.type==="income"){
 
+
 balance+=t.amount;
+
 
 }
 
 else{
 
+
 balance-=t.amount;
 
-}
 
 }
+
+
+}
+
+
 
 });
 
+
+
+
+
 return balance;
 
+
+
 }
+
+
+
+
+
+
+
+
+
 
 // =============================
 // CREATE PERMANENT OPENING BALANCE
@@ -492,11 +708,17 @@ return balance;
 
 function createOpeningBalance(){
 
+
+
 let now=new Date();
+
 
 let month=now.getMonth()+1;
 
 let year=now.getFullYear();
+
+
+
 
 let openingDate=
 
@@ -505,74 +727,263 @@ String(month).padStart(2,"0")+
 "/"+
 year;
 
-// check existing opening balance
+
+
+
+
+
 
 let exists=transactions.some(t=>{
+
 
 return t.opening &&
 t.date===openingDate;
 
+
 });
+
+
+
+
 
 if(exists){
 
+
 return;
+
 
 }
 
+
+
+
+
+
 let balance=calculatePreviousBalance();
+
+
+
+
 
 let opening={
 
 
+
 name:"System",
+
 
 date:openingDate,
 
+
 amount:balance,
+
 
 type:"income",
 
+
 desc:"Opening Balance",
+
 
 opening:true
 
 
+
 };
 
-// SAVE PERMANENTLY TO FIREBASE
+
+
+
+
 
 
 if(db){
+
+
 
 db.collection("transactions")
 .add(opening)
 .then(()=>{
 
+
 console.log("Opening Balance Created");
+
 
 loadFromFirebase();
 
+
+
 });
+
+
 
 }
 
 else{
 
+
+
 opening.id=Date.now();
 
+
 transactions.push(opening);
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
 
-}
+
 
 }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =============================
+// RECALCULATE OPENING BALANCE
+// =============================
+
+document.getElementById("recalculateBtn")
+.addEventListener("click",function(){
+
+
+
+let now=new Date();
+
+
+
+let month=now.getMonth()+1;
+
+let year=now.getFullYear();
+
+
+
+
+let openingDate=
+
+"01/"+
+String(month).padStart(2,"0")+
+"/"+
+year;
+
+
+
+
+
+
+let opening=transactions.find(t=>{
+
+
+return t.opening &&
+t.date===openingDate;
+
+
+});
+
+
+
+
+
+if(!opening){
+
+
+alert("Opening Balance not found");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let newBalance=calculatePreviousBalance();
+
+
+
+
+
+if(db && opening.id){
+
+
+
+db.collection("transactions")
+.doc(opening.id)
+.update({
+
+amount:newBalance
+
+})
+
+.then(()=>{
+
+
+alert(
+"Opening Balance updated: RM "+
+newBalance.toFixed(2)
+);
+
+
+
+loadFromFirebase();
+
+
+});
+
+
+
+}
+
+else{
+
+
+
+opening.amount=newBalance;
+
+
+
+localStorage.setItem(
+"moneyData",
+JSON.stringify(transactions)
+);
+
+
+
+render();
+
+
+
+alert(
+"Opening Balance updated: RM "+
+newBalance.toFixed(2)
+);
+
+
+
+}
+
+
+
+});
 
 // =============================
 // LOAD FIREBASE
@@ -580,7 +991,9 @@ render();
 
 function loadFromFirebase(){
 
+
 if(!db){
+
 
 createOpeningBalance();
 
@@ -591,11 +1004,14 @@ return;
 
 }
 
+
+
+
+
 db.collection("transactions")
 .get()
 
 .then(snapshot=>{
-
 
 
 transactions=[];
@@ -616,16 +1032,26 @@ id:doc.id,
 
 });
 
-// create permanent opening balance if needed
+
+
+
+// Check and create monthly opening balance
 
 createOpeningBalance();
+
+
+
 
 localStorage.setItem(
 "moneyData",
 JSON.stringify(transactions)
 );
 
+
+
 render();
+
+
 
 })
 
@@ -640,6 +1066,14 @@ render();
 
 
 }
+
+
+
+
+
+
+
+
 
 // =============================
 // RENDER DISPLAY
@@ -660,28 +1094,56 @@ let income=0;
 
 let expense=0;
 
+
 // SORT
-// Latest date first
-// Opening balance stays above its own month
+// Latest transaction date first
 
 transactions.sort((a,b)=>{
+
+
+
+// Opening balance stays above normal transactions
+
+if(a.opening && !b.opening){
+
+return -1;
+
+}
+
+
+if(!a.opening && b.opening){
+
+return 1;
+
+}
+
 
 let dateA=a.date.split("/").reverse().join("-");
 
 let dateB=b.date.split("/").reverse().join("-");
 
+
+
 return new Date(dateB)-new Date(dateA);
+
+
 
 });
 
 
 transactions.forEach(t=>{
 
+
+
 let li=document.createElement("li");
+
+
 
 if(t.opening){
 
+
 li.className="opening";
+
 
 }
 
@@ -713,11 +1175,10 @@ ${t.desc}
 
 </span>
 
+
 `;
 
-
-// Opening balance cannot delete
-
+// Opening balance cannot be deleted
 
 if(t.opening){
 
@@ -730,11 +1191,13 @@ li.querySelector(".delete")
 
 else{
 
+
 li.querySelector(".delete")
 .addEventListener(
 "click",
 ()=>deleteItem(t.id)
 );
+
 
 }
 
@@ -756,13 +1219,19 @@ expense+=t.amount;
 
 }
 
+
+
 });
 
 document.getElementById("income")
 .innerText=income.toFixed(2);
 
+
+
 document.getElementById("expense")
 .innerText=expense.toFixed(2);
+
+
 
 document.getElementById("balance")
 .innerText=(income-expense).toFixed(2);
@@ -770,10 +1239,12 @@ document.getElementById("balance")
 }
 
 // =============================
-// START
+// START PROGRAM
 // =============================
 
 loadFromFirebase();
+
+
 
 </script>
 
