@@ -422,7 +422,35 @@ loadTransactions();
 
 
 
+// =====================================
+// SEARCH + FILTER
+// =====================================
 
+
+document
+.getElementById("search")
+.addEventListener(
+"input",
+render
+);
+
+
+
+document
+.getElementById("personFilter")
+.addEventListener(
+"change",
+render
+);
+
+
+
+document
+.getElementById("monthFilter")
+.addEventListener(
+"change",
+render
+);
 
 
 
