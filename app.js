@@ -9,23 +9,48 @@ let editID = null;
 
 async function loadTransactions(){
 
+console.log("Loading transactions...");
+
+
 try{
 
 
 transactions=[];
 
 
-// LOAD FIREBASE FIRST
 
-if(db){
+if(!db){
+
+console.log("Firebase not connected");
+
+return;
+
+}
 
 
-let snapshot =
-await db.collection("transactions").get();
+
+let snapshot = await db
+.collection("transactions")
+.get();
+
+
+
+console.log(
+"Firebase documents:",
+snapshot.size
+);
 
 
 
 snapshot.forEach(doc=>{
+
+
+console.log(
+"Loading:",
+doc.id,
+doc.data()
+);
+
 
 
 transactions.push({
@@ -40,37 +65,22 @@ id:doc.id,
 });
 
 
-}
-
-
-// SHOW HISTORY FIRST
-
-populateMonthFilter();
-
-render();
-
-
-
-// THEN UPDATE BALANCE
-
-await createOpeningBalance();
-
-await createClosingBalance();
-
-
-
-// RELOAD AFTER BALANCE CREATION
-
-populateMonthFilter();
-
-render();
-
 
 
 console.log(
-"Transactions loaded:",
-transactions
+"Total transactions:",
+transactions.length
 );
+
+
+
+
+populateMonthFilter();
+
+
+render();
+
+
 
 
 
@@ -78,10 +88,12 @@ transactions
 
 catch(error){
 
+
 console.error(
-"Load error:",
+"Firebase loading error:",
 error
 );
+
 
 }
 
