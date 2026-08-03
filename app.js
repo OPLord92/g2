@@ -450,7 +450,16 @@ await db.collection("transactions")
 
 
 
+window.addEventListener("load",()=>{
+
+setTimeout(()=>{
+
 loadTransactions();
+
+},1000);
+
+
+});
 
 
 
@@ -565,7 +574,8 @@ transactions.filter(t=>{
 
 
 let matchSearch =
-t.desc.toLowerCase()
+(t.desc || "")
+.toLowerCase()
 .includes(search);
 
 
@@ -679,7 +689,7 @@ ${t.date}
 ${t.name}
 
 
-RM ${t.amount.toFixed(2)}
+RM ${Number(t.amount).toFixed(2)}
 
 
 </div>
