@@ -935,4 +935,4 @@ monthSelect.appendChild(option);
 
 // START
 
-loadTransactions();
+await fixOldTransactions();
