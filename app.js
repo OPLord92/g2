@@ -7,73 +7,21 @@ let transactions = [];
 
 let editID = null;
 
-async function fixOldTransactions(){
-
-for(let t of transactions){
-
-
-if(!t.monthKey && t.date){
-
-
-let parts=t.date.split("/");
-
-
-let monthKey =
-parts[2]+"-"+parts[1];
-
-
-
-t.monthKey=monthKey;
-
-
-
-if(db && t.id){
-
-
-await db.collection("transactions")
-.doc(t.id)
-.update({
-
-monthKey: monthKey
-
-});
-
-
-}
-
-
-}
-
-
-}
-
-
-console.log("Firebase migration completed");
-
-
-}
-
-
-
-
-
-// =====================================
-// LOAD TRANSACTIONS
-// =====================================
-
-
 async function loadTransactions(){
 
+try{
+
+
+transactions=[];
+
+
+// LOAD FIREBASE FIRST
 
 if(db){
 
 
 let snapshot =
 await db.collection("transactions").get();
-
-
-
-transactions=[];
 
 
 
@@ -92,19 +40,51 @@ id:doc.id,
 });
 
 
-
 }
 
 
+// SHOW HISTORY FIRST
 
+populateMonthFilter();
+
+render();
+
+
+
+// THEN UPDATE BALANCE
 
 await createOpeningBalance();
 
 await createClosingBalance();
 
+
+
+// RELOAD AFTER BALANCE CREATION
+
 populateMonthFilter();
 
 render();
+
+
+
+console.log(
+"Transactions loaded:",
+transactions
+);
+
+
+
+}
+
+catch(error){
+
+console.error(
+"Load error:",
+error
+);
+
+}
+
 
 
 }
