@@ -53,73 +53,7 @@ console.log("Firebase migration completed");
 
 }
 
-// =====================================
-// FIX OLD TRANSACTIONS
-// ADD MISSING MONTH KEY
-// =====================================
 
-function fixOldTransactions(){
-
-
-let updated=false;
-
-
-
-transactions.forEach(t=>{
-
-
-if(!t.monthKey && t.date){
-
-
-let parts=t.date.split("/");
-
-
-let day=parts[0];
-
-let month=parts[1];
-
-let year=parts[2];
-
-
-
-t.monthKey =
-year+"-"+month;
-
-
-
-updated=true;
-
-
-
-}
-
-
-});
-
-
-
-
-
-if(updated){
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
-
-console.log(
-"Old transactions updated"
-);
-
-
-}
-
-
-
-}
 
 
 
@@ -168,7 +102,7 @@ await createOpeningBalance();
 
 await createClosingBalance();
 
-
+populateMonthFilter();
 
 render();
 
@@ -231,31 +165,39 @@ return;
 
 
 
+let today = new Date();
+
+
+let monthKey =
+today.getFullYear()
++
+"-"
++
+String(today.getMonth()+1)
+.padStart(2,"0");
+
+
+
 let data={
 
 
 name:person,
 
-
 amount:amount,
-
 
 type:type,
 
-
 desc:description,
 
+date:today.toLocaleDateString("en-GB"),
 
-date:new Date()
-.toLocaleDateString("en-GB"),
+
+monthKey:monthKey,
 
 
 opening:false,
 
-
 closing:false
-
-
 
 };
 
