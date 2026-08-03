@@ -161,7 +161,7 @@ id:doc.id,
 
 }
 
-await fixOldTransactions();
+fixOldTransactions();
 
 
 await createOpeningBalance();
