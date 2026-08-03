@@ -10,7 +10,7 @@ let editID = null;
 async function loadTransactions(){
 
 console.log("Loading transactions...");
-
+console.log("DB =", db);
 
 try{
 
@@ -450,9 +450,12 @@ await db.collection("transactions")
 
 
 
-window.addEventListener("load",()=>{
+window.addEventListener("load", function(){
 
-setTimeout(()=>{
+console.log("Page loaded, starting Firebase load");
+
+
+setTimeout(function(){
 
 loadTransactions();
 
