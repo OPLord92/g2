@@ -875,6 +875,3 @@ monthSelect.appendChild(option);
 
 
 
-// START
-
-await fixOldTransactions();
