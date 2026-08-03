@@ -739,7 +739,83 @@ document
 recalculateOpeningBalance
 );
 
+function populateMonthFilter(){
 
+let monthSelect=document.getElementById("monthFilter");
+
+let months=[];
+
+
+transactions.forEach(t=>{
+
+if(t.monthKey && !months.includes(t.monthKey)){
+
+months.push(t.monthKey);
+
+}
+
+});
+
+
+
+months.sort().reverse();
+
+
+
+monthSelect.innerHTML=
+`
+<option value="all">
+All Months
+</option>
+`;
+
+
+
+months.forEach(m=>{
+
+
+let option=document.createElement("option");
+
+
+option.value=m;
+
+
+let parts=m.split("-");
+
+
+let year=parts[0];
+
+let month=parseInt(parts[1]);
+
+
+
+let monthName=
+new Date(
+year,
+month-1
+)
+.toLocaleString(
+"en-US",
+{
+month:"short"
+}
+);
+
+
+
+option.textContent=
+monthName+" "+year;
+
+
+
+monthSelect.appendChild(option);
+
+
+
+});
+
+
+}
 
 
 
