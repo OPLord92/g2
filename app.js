@@ -7,6 +7,52 @@ let transactions = [];
 
 let editID = null;
 
+async function fixOldTransactions(){
+
+for(let t of transactions){
+
+
+if(!t.monthKey && t.date){
+
+
+let parts=t.date.split("/");
+
+
+let monthKey =
+parts[2]+"-"+parts[1];
+
+
+
+t.monthKey=monthKey;
+
+
+
+if(db && t.id){
+
+
+await db.collection("transactions")
+.doc(t.id)
+.update({
+
+monthKey: monthKey
+
+});
+
+
+}
+
+
+}
+
+
+}
+
+
+console.log("Firebase migration completed");
+
+
+}
+
 // =====================================
 // FIX OLD TRANSACTIONS
 // ADD MISSING MONTH KEY
