@@ -6,220 +6,129 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Money Saving Tracker</title>
+<title>Money Saving Tracker v2.0</title>
+
+<link rel="stylesheet" href="style.css">
+
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 
-<style>
-
-body{
-font-family:Arial;
-background:#f4f6f9;
-padding:20px;
-}
-
-
-.container{
-max-width:650px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
-}
-
-
-input,select,button{
-
-width:100%;
-padding:12px;
-margin:8px 0;
-box-sizing:border-box;
-font-size:16px;
-
-}
-
-
-button{
-
-background:#007bff;
-color:white;
-border:none;
-cursor:pointer;
-
-}
-
-
-#recalculateBtn{
-
-background:#28a745;
-
-}
-
-
-
-
-.summary{
-
-display:flex;
-gap:10px;
-margin-top:20px;
-
-}
-
-
-.box{
-
-flex:1;
-padding:12px;
-text-align:center;
-color:white;
-border-radius:8px;
-
-}
-
-
-.saving{
-background:green;
-}
-
-
-.expenses{
-background:red;
-}
-
-
-.balance{
-background:black;
-}
-
-
-
-
-ul{
-
-list-style:none;
-padding:0;
-margin-top:20px;
-
-}
-
-
-
-
-li{
-
-background:#eee;
-margin:8px 0;
-padding:12px;
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-border-radius:8px;
-
-font-size:14px;
-
-}
-
-
-
-
-.delete{
-
-cursor:pointer;
-font-size:22px;
-display:inline-block;
-
-transition:transform .2s;
-
-}
-
-
-
-.delete:hover{
-
-animation:bounce .5s ease;
-transform:scale(1.3);
-
-}
-
-
-
-@keyframes bounce{
-
-
-0%{
-transform:scale(1);
-}
-
-
-30%{
-transform:scale(1.4);
-}
-
-
-50%{
-transform:scale(.9);
-}
-
-
-70%{
-transform:scale(1.2);
-}
-
-
-100%{
-transform:scale(1.3);
-}
-
-
-}
-
-
-
-
-
-.opening{
-
-background:#fff3cd;
-border-left:5px solid orange;
-
-}
-
-
-
-</style>
-
 </head>
-
 
 
 <body>
 
 
-
 <div class="container">
 
 
-<h2>💰 Money Tracker</h2>
+<h1>
+💰 Money Saving Tracker v2.0
+</h1>
+
+
+<!-- DASHBOARD -->
+
+<div class="dashboard">
+
+
+<div class="card green">
+
+<h3>
+Savings
+</h3>
+
+<p id="totalIncome">
+RM 0.00
+</p>
+
+</div>
 
 
 
-<select id="name">
+<div class="card red">
+
+<h3>
+Expenses
+</h3>
+
+<p id="totalExpense">
+RM 0.00
+</p>
+
+</div>
+
+
+
+
+<div class="card black">
+
+<h3>
+Balance
+</h3>
+
+<p id="totalBalance">
+RM 0.00
+</p>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="balance-box">
+
+
+<p>
+📌 Opening Balance:
+<span id="openingBalance">
+RM 0.00
+</span>
+</p>
+
+
+
+<p>
+📌 Closing Balance:
+<span id="closingBalance">
+RM 0.00
+</span>
+</p>
+
+
+</div>
+
+
+
+
+
+<!-- INPUT FORM -->
+
+
+<div class="form">
+
+
+<h2>
+Transaction
+</h2>
+
+
+
+<select id="person">
 
 <option value="Gary">
 Gary
 </option>
 
-
 <option value="Kiki">
 Kiki
 </option>
-
 
 </select>
 
@@ -257,22 +166,100 @@ Expenses (-)
 
 
 <input
-id="desc"
+id="description"
 placeholder="Purpose">
 
 
 
 
 
-<button id="addBtn">
-Add
+<button id="saveBtn">
+➕ Add Transaction
 </button>
+
+
+<button id="cancelBtn" class="hidden">
+Cancel Edit
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- FILTER -->
+
+
+<div class="filter">
+
+
+<h2>
+Search & Filter
+</h2>
+
+
+
+<input
+id="search"
+placeholder="Search transaction">
+
+
+
+
+
+<select id="personFilter">
+
+
+<option value="all">
+All People
+</option>
+
+
+<option value="Gary">
+Gary
+</option>
+
+
+<option value="Kiki">
+Kiki
+</option>
+
+
+</select>
+
+
+
+
+
+
+<select id="monthFilter">
+
+
+<option value="all">
+All Months
+</option>
+
+
+</select>
+
+
+
+</div>
+
+
 
 
 
 
 <button id="recalculateBtn">
+
 🔄 Recalculate Opening Balance
+
 </button>
 
 
@@ -280,56 +267,19 @@ Add
 
 
 
-<div class="summary">
+<!-- TRANSACTION LIST -->
 
 
-
-<div class="box saving">
-
-<h4>Savings</h4>
-
-<p id="income">
-0.00
-</p>
-
-</div>
+<h2>
+Transactions
+</h2>
 
 
+<ul id="transactionList">
+
+</ul>
 
 
-<div class="box expenses">
-
-<h4>Expenses</h4>
-
-<p id="expense">
-0.00
-</p>
-
-</div>
-
-
-
-
-
-<div class="box balance">
-
-<h4>Balance</h4>
-
-<p id="balance">
-0.00
-</p>
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<ul id="list"></ul>
 
 
 
@@ -342,911 +292,12 @@ Add
 
 
 
-<script>
+<script src="firebase.js"></script>
 
+<script src="accounting.js"></script>
 
-const firebaseConfig = {
+<script src="app.js"></script>
 
-
-apiKey:"AIzaSyBjuMqepGhn6MZLv1OFBMlQFNVDrDjr7V4",
-
-authDomain:"oplord-savings.firebaseapp.com",
-
-projectId:"oplord-savings",
-
-storageBucket:"oplord-savings.firebasestorage.app",
-
-messagingSenderId:"1794473489",
-
-appId:"1:1794473489:web:6056cb5e3cef91bb60bbb0"
-
-
-};
-
-
-
-
-let db=null;
-
-
-
-
-try{
-
-
-firebase.initializeApp(firebaseConfig);
-
-
-db=firebase.firestore();
-
-
-
-}
-
-catch(e){
-
-
-console.log("Firebase unavailable");
-
-
-}
-
-let transactions =
-JSON.parse(localStorage.getItem("moneyData")) || [];
-
-// =============================
-// ADD TRANSACTION
-// =============================
-
-document.getElementById("addBtn")
-.addEventListener("click",function(){
-
-
-let name=document.getElementById("name").value;
-
-let amount=document.getElementById("amount").value;
-
-let type=document.getElementById("type").value;
-
-let desc=document.getElementById("desc").value.trim();
-
-
-let date=new Date().toLocaleDateString("en-GB");
-
-
-
-if(!amount || !desc){
-
-alert("Fill all fields");
-
-return;
-
-}
-
-
-
-let t={
-
-name:name,
-
-date:date,
-
-amount:parseFloat(amount),
-
-type:type,
-
-desc:desc,
-
-opening:false
-
-};
-
-
-
-
-
-if(db){
-
-
-db.collection("transactions")
-.add(t)
-.then(loadFromFirebase)
-.catch(()=>saveLocal(t));
-
-
-}
-
-else{
-
-
-saveLocal(t);
-
-
-}
-
-
-
-clearInputs();
-
-
-
-});
-
-
-
-
-
-
-function clearInputs(){
-
-
-document.getElementById("amount").value="";
-
-document.getElementById("desc").value="";
-
-
-}
-
-
-
-
-
-
-
-
-// =============================
-// SAVE LOCAL
-// =============================
-
-function saveLocal(t){
-
-
-t.id=Date.now();
-
-
-transactions.push(t);
-
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
-
-render();
-
-
-}
-
-
-
-
-
-
-
-
-
-// =============================
-// DELETE TRANSACTION
-// =============================
-
-function deleteItem(id){
-
-
-
-let item=transactions.find(t=>t.id===id);
-
-
-
-if(item && item.opening){
-
-
-alert("Opening Balance cannot be deleted");
-
-
-return;
-
-
-}
-
-
-
-
-
-
-if(db && typeof id==="string"){
-
-
-
-db.collection("transactions")
-.doc(id)
-.delete()
-.then(loadFromFirebase);
-
-
-
-}
-
-else{
-
-
-transactions=
-transactions.filter(t=>t.id!=id);
-
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
-
-render();
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =============================
-// CALCULATE PREVIOUS MONTH BALANCE
-// =============================
-
-function calculatePreviousBalance(){
-
-
-
-let now=new Date();
-
-
-let currentMonth=now.getMonth();
-
-let currentYear=now.getFullYear();
-
-
-
-let balance=0;
-
-
-
-
-
-transactions.forEach(t=>{
-
-
-
-if(t.opening){
-
-return;
-
-}
-
-
-
-
-let parts=t.date.split("/");
-
-
-let month=parseInt(parts[1])-1;
-
-let year=parseInt(parts[2]);
-
-
-
-
-
-// only previous months
-
-if(
-
-year < currentYear ||
-
-(year===currentYear && month < currentMonth)
-
-){
-
-
-
-if(t.type==="income"){
-
-
-balance+=t.amount;
-
-
-}
-
-else{
-
-
-balance-=t.amount;
-
-
-}
-
-
-}
-
-
-
-});
-
-
-
-
-
-return balance;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-// =============================
-// CREATE PERMANENT OPENING BALANCE
-// =============================
-
-function createOpeningBalance(){
-
-
-
-let now=new Date();
-
-
-let month=now.getMonth()+1;
-
-let year=now.getFullYear();
-
-
-
-
-let openingDate=
-
-"01/"+
-String(month).padStart(2,"0")+
-"/"+
-year;
-
-
-
-
-
-
-
-let exists=transactions.some(t=>{
-
-
-return t.opening &&
-t.date===openingDate;
-
-
-});
-
-
-
-
-
-if(exists){
-
-
-return;
-
-
-}
-
-
-
-
-
-
-let balance=calculatePreviousBalance();
-
-
-
-
-
-let opening={
-
-
-
-name:"System",
-
-
-date:openingDate,
-
-
-amount:balance,
-
-
-type:"income",
-
-
-desc:"Opening Balance",
-
-
-opening:true
-
-
-
-};
-
-
-
-
-
-
-
-if(db){
-
-
-
-db.collection("transactions")
-.add(opening)
-.then(()=>{
-
-
-console.log("Opening Balance Created");
-
-
-loadFromFirebase();
-
-
-
-});
-
-
-
-}
-
-else{
-
-
-
-opening.id=Date.now();
-
-
-transactions.push(opening);
-
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
-
-render();
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =============================
-// RECALCULATE OPENING BALANCE
-// =============================
-
-document.getElementById("recalculateBtn")
-.addEventListener("click",function(){
-
-
-
-let now=new Date();
-
-
-
-let month=now.getMonth()+1;
-
-let year=now.getFullYear();
-
-
-
-
-let openingDate=
-
-"01/"+
-String(month).padStart(2,"0")+
-"/"+
-year;
-
-
-
-
-
-
-let opening=transactions.find(t=>{
-
-
-return t.opening &&
-t.date===openingDate;
-
-
-});
-
-
-
-
-
-if(!opening){
-
-
-alert("Opening Balance not found");
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-let newBalance=calculatePreviousBalance();
-
-
-
-
-
-if(db && opening.id){
-
-
-
-db.collection("transactions")
-.doc(opening.id)
-.update({
-
-amount:newBalance
-
-})
-
-.then(()=>{
-
-
-alert(
-"Opening Balance updated: RM "+
-newBalance.toFixed(2)
-);
-
-
-
-loadFromFirebase();
-
-
-});
-
-
-
-}
-
-else{
-
-
-
-opening.amount=newBalance;
-
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
-
-render();
-
-
-
-alert(
-"Opening Balance updated: RM "+
-newBalance.toFixed(2)
-);
-
-
-
-}
-
-
-
-});
-
-// =============================
-// LOAD FIREBASE
-// =============================
-
-function loadFromFirebase(){
-
-
-if(!db){
-
-
-createOpeningBalance();
-
-render();
-
-return;
-
-
-}
-
-
-
-
-
-db.collection("transactions")
-.get()
-
-.then(snapshot=>{
-
-
-transactions=[];
-
-
-
-snapshot.forEach(doc=>{
-
-
-transactions.push({
-
-id:doc.id,
-
-...doc.data()
-
-});
-
-
-});
-
-
-
-
-// Check and create monthly opening balance
-
-createOpeningBalance();
-
-
-
-
-localStorage.setItem(
-"moneyData",
-JSON.stringify(transactions)
-);
-
-
-
-render();
-
-
-
-})
-
-.catch(()=>{
-
-
-render();
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =============================
-// RENDER DISPLAY
-// =============================
-
-function render(){
-
-
-
-let list=document.getElementById("list");
-
-
-list.innerHTML="";
-
-
-
-let income=0;
-
-let expense=0;
-
-
-// SORT
-// Latest transaction date first
-
-transactions.sort((a,b)=>{
-
-
-
-// Opening balance stays above normal transactions
-
-if(a.opening && !b.opening){
-
-return -1;
-
-}
-
-
-if(!a.opening && b.opening){
-
-return 1;
-
-}
-
-
-let dateA=a.date.split("/").reverse().join("-");
-
-let dateB=b.date.split("/").reverse().join("-");
-
-
-
-return new Date(dateB)-new Date(dateA);
-
-
-
-});
-
-
-transactions.forEach(t=>{
-
-
-
-let li=document.createElement("li");
-
-
-
-if(t.opening){
-
-
-li.className="opening";
-
-
-}
-
-li.innerHTML=`
-
-<span>
-
-${t.opening ? "📌" : "📅"}
-
-${t.date}
-
-|
-
-<b>${t.name}</b>
-
-|
-
-${t.desc}
-
-(${t.type==="income" ? "+" : "-"}RM${t.amount.toFixed(2)})
-
-</span>
-
-
-
-<span class="delete">
-
-🗑️
-
-</span>
-
-
-`;
-
-// Opening balance cannot be deleted
-
-if(t.opening){
-
-
-li.querySelector(".delete")
-.style.display="none";
-
-
-}
-
-else{
-
-
-li.querySelector(".delete")
-.addEventListener(
-"click",
-()=>deleteItem(t.id)
-);
-
-
-}
-
-list.appendChild(li);
-
-if(t.type==="income"){
-
-
-income+=t.amount;
-
-
-}
-
-else{
-
-
-expense+=t.amount;
-
-
-}
-
-
-
-});
-
-document.getElementById("income")
-.innerText=income.toFixed(2);
-
-
-
-document.getElementById("expense")
-.innerText=expense.toFixed(2);
-
-
-
-document.getElementById("balance")
-.innerText=(income-expense).toFixed(2);
-
-}
-
-// =============================
-// START PROGRAM
-// =============================
-
-loadFromFirebase();
-
-
-
-</script>
 
 
 </body>
