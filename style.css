@@ -1,0 +1,736 @@
+*{
+box-sizing:border-box;
+}
+
+
+body{
+
+font-family:Arial, Helvetica, sans-serif;
+
+background:#f4f6f9;
+
+margin:0;
+
+padding:20px;
+
+}
+
+
+
+.container{
+
+max-width:900px;
+
+margin:auto;
+
+background:white;
+
+padding:25px;
+
+border-radius:15px;
+
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+
+}
+
+
+
+
+h1{
+
+text-align:center;
+
+color:#333;
+
+}
+
+
+
+h2{
+
+margin-top:25px;
+
+color:#444;
+
+}
+
+
+.app-title{
+    transition: color .3s ease;
+}
+
+body.dark .app-title{
+    color:#ffffff;
+}
+
+
+
+/* =========================
+DASHBOARD
+========================= */
+
+
+.dashboard{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:15px;
+
+margin-top:20px;
+
+}
+
+
+
+.card{
+
+padding:20px;
+
+border-radius:12px;
+
+color:white;
+
+text-align:center;
+
+}
+
+
+
+.card h3{
+
+margin:0;
+
+font-size:18px;
+
+}
+
+
+
+.card p{
+
+font-size:24px;
+
+font-weight:bold;
+
+margin-top:10px;
+
+}
+
+
+
+.green{
+
+background:#28a745;
+
+}
+
+
+.red{
+
+background:#dc3545;
+
+}
+
+
+.black{
+
+background:#F4C542;
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+BALANCE BOX
+========================= */
+
+
+.balance-box{
+
+background:#fff3cd;
+
+border-left:5px solid orange;
+
+padding:15px;
+
+margin-top:20px;
+
+border-radius:8px;
+
+font-size:18px;
+
+color:black;
+
+}
+
+
+
+
+/* =========================
+FORM
+========================= */
+
+
+.form,
+.filter{
+
+margin-top:25px;
+
+padding:15px;
+
+background:#fafafa;
+
+border-radius:10px;
+
+border:1px solid #ddd;
+
+}
+
+
+
+
+input,
+select,
+button{
+
+
+width:100%;
+
+padding:12px;
+
+margin-top:10px;
+
+font-size:16px;
+
+border-radius:8px;
+
+border:1px solid #ccc;
+
+}
+
+
+
+
+
+
+button{
+
+
+background:#007bff;
+
+color:white;
+
+border:none;
+
+cursor:pointer;
+
+transition:.2s;
+
+}
+
+
+
+
+button:hover{
+
+
+opacity:.85;
+
+
+}
+
+
+
+
+#recalculateBtn{
+
+background:#28a745;
+
+margin-top:20px;
+
+}
+
+
+
+
+
+
+.hidden{
+
+display:none;
+
+}
+
+
+
+
+
+
+
+
+
+/* =========================
+TRANSACTION LIST
+========================= */
+
+
+ul{
+
+list-style:none;
+
+padding:0;
+
+}
+
+
+
+li{
+
+background:#eee;
+
+color:#222;
+
+margin:8px 0;
+
+padding:12px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+border-radius:8px;
+
+font-size:14px;
+
+transition:0.3s;
+
+}
+
+
+
+.transaction-info{
+
+
+line-height:1.6;
+
+}
+
+
+
+
+.income{
+
+
+border-left:5px solid green;
+
+}
+
+
+
+.expense{
+
+
+border-left:5px solid red;
+
+}
+
+
+
+.opening{
+
+
+background:#fff3cd;
+
+border-left:5px solid orange;
+
+}
+
+
+
+.closing{
+
+
+background:#d1ecf1;
+
+border-left:5px solid #17a2b8;
+
+}
+
+
+
+
+
+
+/* =========================
+BUTTON ICONS
+========================= */
+
+
+.action-btn{
+
+
+font-size:20px;
+
+cursor:pointer;
+
+margin-left:10px;
+
+}
+
+
+
+.edit{
+
+color:#007bff;
+
+}
+
+
+
+.delete{
+
+color:red;
+
+}
+
+
+
+
+
+
+
+
+/* =========================
+MOBILE
+========================= */
+
+
+@media(max-width:700px){
+
+
+.dashboard{
+
+grid-template-columns:1fr;
+
+}
+
+
+
+.container{
+
+padding:15px;
+
+}
+
+
+
+li{
+
+font-size:14px;
+
+}
+
+
+
+}
+
+/* DARK MODE */
+
+body.dark{
+
+background:#121212;
+color:white;
+
+}
+
+
+body.dark .container{
+
+background:#1e1e1e;
+
+}
+
+
+
+body.dark li{
+
+background:#333;
+color:white;
+
+}
+
+
+
+body.dark input,
+body.dark select{
+
+background:#222;
+color:white;
+border:1px solid #555;
+
+}
+
+
+
+body.dark button{
+
+background:#444;
+
+}
+
+/* ========================= */
+/* DARK / LIGHT MODE BUTTON */
+/* ========================= */
+
+.theme-toggle{
+
+width:45px;
+height:45px;
+
+border-radius:50%;
+
+border:none;
+
+font-size:22px;
+
+cursor:pointer;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+padding:0;
+
+background:#222;
+
+color:white;
+
+transition:0.3s;
+
+}
+
+
+.theme-toggle:hover{
+
+transform:scale(1.1);
+
+}
+
+
+
+/* DARK MODE */
+
+body.dark .form{
+
+background:black;
+
+
+}
+
+body.dark h2{
+
+color:white;
+
+}
+
+body.dark{
+
+background:#121212;
+color:white;
+
+}
+
+
+body.dark .container{
+
+background:#1e1e1e;
+
+}
+
+
+
+body.dark li{
+
+background:#333;
+color:white;
+
+}
+
+
+
+body.dark input,
+body.dark select{
+
+background:#222;
+color:white;
+
+border:1px solid #555;
+
+}
+
+
+
+body.dark .theme-toggle{
+
+background:white;
+
+color:#222;
+
+}
+
+/* ========================= */
+/* DARK MODE COMPLETE THEME */
+/* ========================= */
+
+
+body.dark{
+
+background:#121212;
+color:#f5f5f5;
+
+}
+
+
+
+/* Main container */
+
+body.dark .container{
+
+background:#1e1e1e;
+
+color:white;
+
+}
+
+
+
+/* Input / Select */
+
+body.dark input,
+body.dark select{
+
+background:#2b2b2b;
+
+color:white;
+
+border:1px solid #555;
+
+}
+
+
+
+/* Buttons */
+
+body.dark button{
+
+background:#333;
+
+color:white;
+
+}
+
+
+
+/* Transaction list */
+
+body.dark li{
+
+background:#2a2a2a;
+
+color:white;
+
+border:1px solid #444;
+
+}
+
+
+
+/* Transaction text */
+
+body.dark .transaction-info{
+
+color:white;
+
+}
+
+
+
+body.dark b{
+
+color:#ffffff;
+
+}
+
+
+
+/* Summary boxes */
+
+body.dark .saving{
+
+background:#006400;
+
+color:white;
+
+}
+
+
+body.dark .expenses{
+
+background:#8b0000;
+
+color:white;
+
+}
+
+
+body.dark .balance{
+
+background:#F4C542;
+
+color:white;
+
+}
+
+
+
+/* Delete icon */
+
+body.dark .delete{
+
+color:#ff7777;
+
+}
+
+
+
+/* Edit icon */
+
+body.dark .edit{
+
+color:#66ccff;
+
+}
+
+
+
+/* Theme button */
+
+body.dark .theme-toggle{
+
+background:white;
+
+color:#222;
+
+}
+
