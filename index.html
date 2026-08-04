@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Money Saving Tracker v2.0</title>
+
+<button id="themeBtn" class="theme-toggle">
+🌙
+</button>
+
+<link rel="stylesheet" href="style.css">
+
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1 class="app-title">💰 Money Saving Tracker v2.0</h1>
+
+
+<!-- DASHBOARD -->
+
+<div class="dashboard">
+
+
+<div class="card green">
+
+<h3>
+Savings
+</h3>
+
+<p id="totalIncome">
+RM 0.00
+</p>
+
+</div>
+
+
+
+<div class="card red">
+
+<h3>
+Expenses
+</h3>
+
+<p id="totalExpense">
+RM 0.00
+</p>
+
+</div>
+
+
+
+
+<div class="card black">
+
+<h3>
+Balance
+</h3>
+
+<p id="totalBalance">
+RM 0.00
+</p>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="balance-box">
+
+
+<p>
+📌 Opening Balance:
+<span id="openingBalance">
+RM 0.00
+</span>
+</p>
+
+
+
+<p>
+📌 Closing Balance:
+<span id="closingBalance">
+RM 0.00
+</span>
+</p>
+
+
+</div>
+
+
+
+
+
+<!-- INPUT FORM -->
+
+
+<div class="form">
+
+
+<h2>
+Transaction
+</h2>
+
+
+
+<select id="person">
+
+<option value="Gary">
+Gary
+</option>
+
+<option value="Kiki">
+Kiki
+</option>
+
+</select>
+
+
+
+
+
+<input 
+id="amount"
+type="number"
+placeholder="Amount">
+
+
+
+
+
+
+<select id="type">
+
+
+<option value="income">
+Savings (+)
+</option>
+
+
+<option value="expense">
+Expenses (-)
+</option>
+
+
+</select>
+
+
+
+
+
+<input
+id="description"
+placeholder="Purpose">
+
+
+
+
+
+<button id="saveBtn">
+➕ Add Transaction
+</button>
+
+
+<button id="cancelBtn" class="hidden">
+Cancel Edit
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<button id="recalculateBtn">
+
+🔄 Recalculate Opening Balance
+
+</button>
+
+
+
+
+
+
+<!-- TRANSACTION LIST -->
+
+
+<h2>
+Transactions
+</h2>
+
+
+<ul id="transactionList">
+
+</ul>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<script src="firebase.js"></script>
+
+<script src="accounting.js"></script>
+
+<script src="app.js"></script>
+
+
+
+</body>
+
+</html>
